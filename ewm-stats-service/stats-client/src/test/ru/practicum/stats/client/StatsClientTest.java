@@ -2,6 +2,7 @@ package ru.practicum.stats.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.client.MockRestServiceServer;
 
+import ru.practicum.stats.client.exceptions.StatsClientRequestException;
+import ru.practicum.stats.client.exceptions.StatsServerException;
 import ru.practicum.stats.dto.EndpointHit;
 import ru.practicum.stats.dto.ViewStats;
 
@@ -68,5 +71,33 @@ public class StatsClientTest {
                 client.getStats("2020-01-01 10:10:10", "2021-01-01 10:10:10", null, null);
 
         assertThat(response.getStatusCode(), is(HttpStatusCode.valueOf(OK)));
+    }
+
+    @Test
+    void testSaveHit_testServerExceptionHandling() {
+        mockServer.expect(method(HttpMethod.POST)).andRespond(withStatus(HttpStatusCode.valueOf(500)));
+        Assertions.assertThrows(StatsServerException.class,
+                () -> client.saveHit("app", "uri", "ip", LocalDateTime.now()));
+    }
+
+    @Test
+    void testSaveHit_testClientExceptionHandling() {
+        mockServer.expect(method(HttpMethod.POST)).andRespond(withStatus(HttpStatusCode.valueOf(400)));
+        Assertions.assertThrows(StatsClientRequestException.class,
+                () -> client.saveHit("app", "uri", "ip", LocalDateTime.now()));
+    }
+
+    @Test
+    void testGetStats_testServerExceptionHandling() {
+        mockServer.expect(method(HttpMethod.GET)).andRespond(withStatus(HttpStatusCode.valueOf(500)));
+        Assertions.assertThrows(StatsServerException.class,
+                () -> client.getStats("start", "end", null, null));
+    }
+
+    @Test
+    void testGetStats_testClientExceptionHandling() {
+        mockServer.expect(method(HttpMethod.GET)).andRespond(withStatus(HttpStatusCode.valueOf(400)));
+        Assertions.assertThrows(StatsClientRequestException.class,
+                () -> client.getStats("start", "end", null, null));
     }
 }
