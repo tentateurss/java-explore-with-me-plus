@@ -9,7 +9,6 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-//Взял из ветки stat_svc_controller
 @Getter
 @Setter
 @Builder

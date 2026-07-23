@@ -12,7 +12,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import ru.practicum.stats.client.exceptions.StatsClientRequestException;
-import ru.practicum.stats.dto.EndpointHit;
+import ru.practicum.stats.dto.HitRequestDto;
 import ru.practicum.stats.dto.ErrorResponse;
 import ru.practicum.stats.dto.ViewStats;
 import ru.practicum.stats.client.exceptions.StatsServerException;
@@ -43,7 +43,7 @@ public class StatsClient {
         log.info("stats-client: Получен запрос на сохранение данных о запросе.");
         log.trace("stats-client: Данные запроса: app={}, uri={}, ip={}, timestamp={}.", app, uri, ip, timestamp);
 
-        EndpointHit hit = EndpointHit.builder()
+        HitRequestDto hit = HitRequestDto.builder()
                 .app(app)
                 .uri(uri)
                 .ip(ip)
