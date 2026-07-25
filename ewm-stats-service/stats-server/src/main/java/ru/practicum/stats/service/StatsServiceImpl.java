@@ -21,6 +21,16 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+        if (uris == null || uris.isEmpty()) {
+            // получаем все записи за период
+            if (unique) {
+                return hitRepository.getHitsByDateAndUniqueIpLimits(start, end, null);
+            } else {
+                return hitRepository.getHitsByDateLimits(start, end, null);
+            }
+        }
+
+        // если uris заданы
         if (unique) {
             return hitRepository.getHitsByDateAndUniqueIpLimits(start, end, uris);
         } else {
