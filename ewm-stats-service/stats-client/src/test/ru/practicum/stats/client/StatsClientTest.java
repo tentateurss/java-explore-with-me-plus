@@ -3,6 +3,7 @@ package ru.practicum.stats.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,13 +40,18 @@ public class StatsClientTest {
     @Value("${stats-server.url}")
     private String baseUri;
 
+    @BeforeEach
+    void setUp() {
+        mockServer.reset();
+    }
+
     @Test
     void testSaveHit() throws Exception {
         HitRequestDto hit = HitRequestDto.builder()
                 .app("app")
                 .uri("uri")
                 .ip("0.0.0.0")
-                .timestamp(LocalDateTime.now())
+                .timestamp("2026-07-26 12:00:00")
                 .build();
 
         String json = objectMapper.writeValueAsString(hit);
@@ -55,7 +61,12 @@ public class StatsClientTest {
                 .andExpect(content().json(json))
                 .andRespond(withStatus(HttpStatusCode.valueOf(CREATED)));
 
-        ResponseEntity<Void> response = client.saveHit(hit.getApp(), hit.getUri(), hit.getIp(), hit.getTimestamp());
+        ResponseEntity<Void> response = client.saveHit(
+                hit.getApp(),
+                hit.getUri(),
+                hit.getIp(),
+                LocalDateTime.now()
+        );
         assertThat(response.getBody(), nullValue());
         assertThat(response.getStatusCode(), is(HttpStatusCode.valueOf(CREATED)));
     }
