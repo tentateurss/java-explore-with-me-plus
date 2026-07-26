@@ -14,7 +14,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 
 import ru.practicum.stats.client.exceptions.StatsClientRequestException;
 import ru.practicum.stats.client.exceptions.StatsServerException;
-import ru.practicum.stats.dto.EndpointHit;
+import ru.practicum.stats.dto.HitRequestDto;
 import ru.practicum.stats.dto.ViewStats;
 
 import java.time.LocalDateTime;
@@ -41,7 +41,7 @@ public class StatsClientTest {
 
     @Test
     void testSaveHit() throws Exception {
-        EndpointHit hit = EndpointHit.builder()
+        HitRequestDto hit = HitRequestDto.builder()
                 .app("app")
                 .uri("uri")
                 .ip("0.0.0.0")
