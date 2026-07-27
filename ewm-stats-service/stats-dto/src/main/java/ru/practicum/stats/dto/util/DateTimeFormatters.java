@@ -1,4 +1,4 @@
-package ru.practicum.stats.util;
+package ru.practicum.stats.dto.util;
 
 import java.time.format.DateTimeFormatter;
 
@@ -10,5 +10,6 @@ public class DateTimeFormatters {
             DateTimeFormatter.ofPattern(PATTERN);
 
     private DateTimeFormatters() {
+
     }
 }

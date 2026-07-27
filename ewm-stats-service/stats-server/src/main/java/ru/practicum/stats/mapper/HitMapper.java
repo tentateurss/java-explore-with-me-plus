@@ -5,7 +5,7 @@ import ru.practicum.stats.model.Hit;
 
 import java.time.LocalDateTime;
 
-import static ru.practicum.stats.util.DateTimeFormatters.STANDARD;
+import static ru.practicum.stats.dto.util.DateTimeFormatters.STANDARD;
 
 public class HitMapper {
 

@@ -19,12 +19,11 @@ import ru.practicum.stats.client.exceptions.StatsServerException;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static ru.practicum.stats.util.DateTimeFormatters.STANDARD;
+import static ru.practicum.stats.dto.util.DateTimeFormatters.STANDARD;
 
 @Slf4j
 @Service
