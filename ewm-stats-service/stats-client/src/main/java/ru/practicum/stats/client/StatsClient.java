@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static ru.practicum.stats.util.DateTimeFormatters.STANDARD;
+
 @Slf4j
 @Service
 public class StatsClient {
@@ -44,7 +46,7 @@ public class StatsClient {
         log.info("stats-client: Получен запрос на сохранение данных о запросе.");
         log.trace("stats-client: Данные запроса: app={}, uri={}, ip={}, timestamp={}.", app, uri, ip, timestamp);
 
-        String timestampStr = timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String timestampStr = timestamp.format(STANDARD);
 
         HitRequestDto hit = HitRequestDto.builder()
                 .app(app)

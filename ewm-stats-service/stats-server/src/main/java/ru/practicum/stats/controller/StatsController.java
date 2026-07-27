@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.stats.dto.HitRequestDto;
 import ru.practicum.stats.dto.ViewStats;
 import ru.practicum.stats.service.StatsService;
+import ru.practicum.stats.util.DateTimeFormatters;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,8 +22,8 @@ public class StatsController {
 
     @GetMapping("/stats")
     @ResponseStatus(HttpStatus.OK)
-    List<ViewStats> getStats(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-                             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+    List<ViewStats> getStats(@RequestParam @DateTimeFormat(pattern = DateTimeFormatters.PATTERN) LocalDateTime start,
+                             @RequestParam @DateTimeFormat(pattern = DateTimeFormatters.PATTERN) LocalDateTime end,
                              @RequestParam(required = false) List<String> uris,
                              @RequestParam(defaultValue = "false") boolean unique) {
         log.info("stat-server - Controller: Получаем объекты статистики по параметрам: start {}, end {}, uris {}, unique {}",
