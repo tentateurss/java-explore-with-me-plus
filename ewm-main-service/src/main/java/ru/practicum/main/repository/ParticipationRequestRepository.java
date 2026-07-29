@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.main.model.ParticipationRequest;
 
 @Repository
-public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest,Long> {
+public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
 }
