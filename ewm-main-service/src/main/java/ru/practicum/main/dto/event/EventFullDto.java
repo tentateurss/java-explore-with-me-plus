@@ -5,7 +5,6 @@ import lombok.*;
 import ru.practicum.main.dto.category.CategoryDto;
 import ru.practicum.main.dto.user.UserShortDto;
 import ru.practicum.main.enums.EventState;
-import ru.practicum.main.model.Location;
 
 import java.time.LocalDateTime;
 
@@ -25,7 +24,7 @@ public class EventFullDto {
 
     private EventState state;
 
-    private Location location;
+    private LocationDto location;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;

@@ -1,8 +1,8 @@
 package ru.practicum.main.mapper;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.main.dto.CategoryDto;
-import ru.practicum.main.dto.NewCategoryDto;
+import ru.practicum.main.dto.category.CategoryDto;
+import ru.practicum.main.dto.category.NewCategoryDto;
 import ru.practicum.main.model.Category;
 
 @UtilityClass
@@ -14,11 +14,11 @@ public class CategoryMapper {
 
     public Category toEntity(NewCategoryDto dto) {
         Category category = new Category();
-        category.setName(dto.getName());
+        category.setName(dto.getName().trim());
         return category;
     }
 
-    public void updateEntity(Category category, CategoryDto dto) {
-        category.setName(dto.getName());
+    public void updateEntity(Category category, NewCategoryDto dto) {
+        category.setName(dto.getName().trim());
     }
 }
