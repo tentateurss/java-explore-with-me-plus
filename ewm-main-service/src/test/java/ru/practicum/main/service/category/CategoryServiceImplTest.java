@@ -5,30 +5,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.ActiveProfiles;
 import ru.practicum.main.dto.CategoryDto;
 import ru.practicum.main.dto.NewCategoryDto;
 import ru.practicum.main.exception.ConflictException;
 import ru.practicum.main.exception.NotFoundException;
-import ru.practicum.main.mapper.CategoryMapper;
 import ru.practicum.main.model.Category;
 import ru.practicum.main.repository.CategoryRepository;
 import ru.practicum.main.repository.EventRepository;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@ActiveProfiles("test")
 class CategoryServiceImplTest {
 
     @Mock
@@ -37,30 +28,27 @@ class CategoryServiceImplTest {
     @Mock
     private EventRepository eventRepository;
 
-    @Mock
-    private CategoryMapper categoryMapper;
-
     @InjectMocks
     private CategoryServiceImpl categoryService;
 
     @Test
-    void getCategoryByIdWhenExistsShouldReturnCategory() {
+    void getCategoryById_whenExists_shouldReturnCategory() {
         Long id = 1L;
         Category category = new Category();
         category.setId(id);
         category.setName("Test");
 
         when(categoryRepository.findById(id)).thenReturn(Optional.of(category));
-        when(categoryMapper.toDto(category)).thenReturn(new CategoryDto(id, "Test"));
 
         CategoryDto result = categoryService.getCategoryById(id);
 
         assertNotNull(result);
         assertEquals(id, result.getId());
+        assertEquals("Test", result.getName());
     }
 
     @Test
-    void getCategoryByIdWhenNotExistsShouldThrowNotFoundException() {
+    void getCategoryById_whenNotExists_shouldThrowNotFoundException() {
         Long id = 999L;
         when(categoryRepository.findById(id)).thenReturn(Optional.empty());
 
@@ -68,7 +56,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void createCategoryShouldSaveAndReturn() {
+    void createCategory_shouldSaveAndReturn() {
         NewCategoryDto dto = new NewCategoryDto("New Category");
         Category category = new Category();
         category.setName("New Category");
@@ -76,19 +64,18 @@ class CategoryServiceImplTest {
         saved.setId(1L);
         saved.setName("New Category");
 
-        when(categoryMapper.toEntity(dto)).thenReturn(category);
-        when(categoryRepository.save(category)).thenReturn(saved);
-        when(categoryMapper.toDto(saved)).thenReturn(new CategoryDto(1L, "New Category"));
+        when(categoryRepository.save(any(Category.class))).thenReturn(saved);
 
         CategoryDto result = categoryService.createCategory(dto);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("New Category", result.getName());
+        verify(categoryRepository, times(1)).save(any(Category.class));
     }
 
     @Test
-    void deleteCategoryWhenNoEventsShouldDelete() {
+    void deleteCategory_whenNoEvents_shouldDelete() {
         Long id = 1L;
         when(eventRepository.existsByCategoryId(id)).thenReturn(false);
         doNothing().when(categoryRepository).deleteById(id);
@@ -98,7 +85,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void deleteCategoryWhenHasEventsShouldThrowConflictException() {
+    void deleteCategory_whenHasEvents_shouldThrowConflictException() {
         Long id = 1L;
         when(eventRepository.existsByCategoryId(id)).thenReturn(true);
 

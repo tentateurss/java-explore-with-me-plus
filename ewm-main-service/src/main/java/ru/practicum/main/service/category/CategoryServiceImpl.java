@@ -25,40 +25,38 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final EventRepository eventRepository;
-    private final CategoryMapper categoryMapper;
 
     @Override
     public List<CategoryDto> getAllCategories(int from, int size) {
         PageRequest pageRequest = PageRequest.of(from / size, size);
         return categoryRepository.findAll(pageRequest)
                 .stream()
-                .map(categoryMapper::toDto)
+                .map(CategoryMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public CategoryDto getCategoryById(Long id) {
         Category category = findCategoryById(id);
-        return categoryMapper.toDto(category);
+        return CategoryMapper.toDto(category);
     }
 
     @Override
     @Transactional
     public CategoryDto createCategory(NewCategoryDto dto) {
-        Category category = categoryMapper.toEntity(dto);
+        Category category = CategoryMapper.toEntity(dto);
         Category saved = categoryRepository.save(category);
         log.info("Категория создана: {}", saved.getName());
-        return categoryMapper.toDto(saved);
+        return CategoryMapper.toDto(saved);
     }
 
     @Override
-    @Transactional
-    public CategoryDto updateCategory(Long id, CategoryDto dto) {
+    public CategoryDto updateCategory(Long id, NewCategoryDto dto) {
         Category category = findCategoryById(id);
-        categoryMapper.updateEntity(category, dto);
+        category.setName(dto.getName());
         Category updated = categoryRepository.save(category);
         log.info("Категория обновлена: {}", updated.getName());
-        return categoryMapper.toDto(updated);
+        return CategoryMapper.toDto(updated);
     }
 
     @Override

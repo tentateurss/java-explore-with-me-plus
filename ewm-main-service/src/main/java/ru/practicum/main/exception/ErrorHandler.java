@@ -5,10 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.main.dto.ApiError;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -16,35 +16,30 @@ import java.util.Map;
 public class ErrorHandler {
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNotFound(NotFoundException e) {
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiError handleNotFound(NotFoundException e) {
         log.warn("Not found: {}", e.getMessage());
-        return buildResponse(HttpStatus.NOT_FOUND, e.getMessage());
+        return new ApiError(HttpStatus.NOT_FOUND.getReasonPhrase(), "Object not found", e.getMessage());
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<Map<String, Object>> handleConflict(ConflictException e) {
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleConflict(ConflictException e) {
         log.warn("Conflict: {}", e.getMessage());
-        return buildResponse(HttpStatus.CONFLICT, e.getMessage());
+        return new ApiError(HttpStatus.CONFLICT.getReasonPhrase(), "Conflict", e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException e) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleValidation(MethodArgumentNotValidException e) {
         log.warn("Validation error: {}", e.getMessage());
-        return buildResponse(HttpStatus.BAD_REQUEST, "Invalid request data");
+        return new ApiError(HttpStatus.BAD_REQUEST.getReasonPhrase(), "Invalid request data", e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneral(Exception e) {
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiError handleGeneral(Exception e) {
         log.error("Unexpected error", e);
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
-    }
-
-    private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String message) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
-        body.put("message", message);
-        return ResponseEntity.status(status).body(body);
+        return new ApiError(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), "Internal server error", e.getMessage());
     }
 }
