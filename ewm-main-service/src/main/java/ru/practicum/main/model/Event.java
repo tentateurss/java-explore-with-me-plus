@@ -29,9 +29,6 @@ public class Event {
     private Category category;
 
     @Column(nullable = false)
-    private Integer confirmedRequests = 0;
-
-    @Column(nullable = false)
     private LocalDateTime createdOn;
 
     @Column(nullable = false)
@@ -64,7 +61,4 @@ public class Event {
 
     @Column(nullable = false)
     private String title;
-
-    @Column(nullable = false)
-    private Long views = 0L;
 }
