@@ -28,6 +28,13 @@ public class ErrorHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleBadRequest(BadRequestException e) {
+        log.warn("Bad request: {}", e.getMessage());
+        return new ApiError(HttpStatus.BAD_REQUEST.getReasonPhrase(), "Invalid request data", e.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidation(MethodArgumentNotValidException e) {
         log.warn("Validation error: {}", e.getMessage());
         return new ApiError(HttpStatus.BAD_REQUEST.getReasonPhrase(), "Invalid request data", e.getMessage());
