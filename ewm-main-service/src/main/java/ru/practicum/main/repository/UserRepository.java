@@ -6,4 +6,5 @@ import ru.practicum.main.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+    boolean existsByEmailIgnoreCase(String email);
 }
