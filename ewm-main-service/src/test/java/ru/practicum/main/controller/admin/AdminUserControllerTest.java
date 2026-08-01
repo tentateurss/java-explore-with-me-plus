@@ -3,7 +3,6 @@ package ru.practicum.main.controller.admin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -20,11 +19,9 @@ import ru.practicum.main.service.user.UserService;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {AdminUserController.class, ErrorHandler.class})
@@ -174,5 +171,14 @@ public class AdminUserControllerTest {
 
         mvc.perform(delete(USERS_URL + "/9999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testRuntimeException_returnsInternalServerError() throws Exception {
+        doThrow(RuntimeException.class)
+                .when(userService).deleteUser(anyLong());
+
+        mvc.perform(delete(USERS_URL + "/1"))
+                .andExpect(status().isInternalServerError());
     }
 }
