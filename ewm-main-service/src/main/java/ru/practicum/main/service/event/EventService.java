@@ -16,8 +16,9 @@ public interface EventService {
 
     //Перегруженный метод юзер/админ, посмотрим как будет у того, кто делает этот сервис
     EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest);
+
     EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest updateEventAdminRequest);
 
-    List<EventFullDto> getEventsWithParameters(List<Long> users, EventState states, List<Long> categories, String rangeStart, String rangeEnd, Integer from, Integer size);
+    List<EventFullDto> getEventsWithParameters(List<Long> users, List<String> states, List<Long> categories, String rangeStart, String rangeEnd, Integer from, Integer size);
 
 }

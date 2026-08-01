@@ -1,4 +1,4 @@
-package ru.practicum.main.controller.admin;
+package ru.practicum.main.controller.adminapi;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class AdminEventController {
     //GET /admin/events (поиск по пользователям, состояниям, категориям)
     @GetMapping
     public List<EventFullDto> getEvents(@RequestParam(required = false) List<Long> users,
-                                        @RequestParam(required = false) EventState states,
+                                        @RequestParam(required = false) List<String> states,
                                         @RequestParam(required = false) List<Long> categories,
                                         @RequestParam(required = false) String rangeStart,
                                         @RequestParam(required = false) String rangeEnd,

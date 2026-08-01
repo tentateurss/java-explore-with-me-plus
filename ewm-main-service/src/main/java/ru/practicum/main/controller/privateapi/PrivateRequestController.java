@@ -1,5 +1,6 @@
-package ru.practicum.main.controller.publicapi;
+package ru.practicum.main.controller.privateapi;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -39,7 +40,6 @@ public class PrivateRequestController {
         return requestService.cancelRequest(userId, requestId);
     }
 
-    //Не должен ли это эндпоинт быть в PrivateEventController, как в спецификации?
     //GET /users/{userId}/events/{eventId}/requests
     @GetMapping("/events/{eventId}/requests")
     public List<ParticipationRequestDto> getEventRequests(@PathVariable Long userId,
@@ -47,12 +47,11 @@ public class PrivateRequestController {
         return requestService.getEventRequests(userId, eventId);
     }
 
-    //Не должен ли это эндпоинт быть в PrivateEventController, как в спецификации?
     //PATCH /users/{userId}/events/{eventId}/requests
     @PatchMapping("/events/{eventId}/requests")
     public EventRequestStatusUpdateResult changeRequestStatus(@PathVariable Long userId,
                                                               @PathVariable Long eventId,
-                                                              @RequestBody EventRequestStatusUpdateRequest statusUpdateResult) {
+                                                              @Valid @RequestBody EventRequestStatusUpdateRequest statusUpdateResult) {
         return requestService.changeRequestStatus(userId, eventId, statusUpdateResult);
     }
 

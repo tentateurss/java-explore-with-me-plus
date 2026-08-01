@@ -47,16 +47,8 @@ public class PrivateEventController {
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable Long userId,
                                     @PathVariable Long eventId,
-                                    UpdateEventUserRequest updateEventUserRequest) {
+                                    @Valid @RequestBody UpdateEventUserRequest updateEventUserRequest) {
         return eventService.updateEvent(userId, eventId, updateEventUserRequest);
     }
-
-    //В спецификации этот эндпоинт должен быть здесь, может тут его делать?
-    //Реализован в PrivateRequestController в соответствии с таской
-    //GET /users/{userId}/events/{eventId}/requests
-
-    //В спецификации этот эндпоинт должен быть здесь, может тут его делать?
-    //Реализован в PrivateRequestController в соответствии с таской
-    //PATCH /users/{userId}/events/{eventId}/requests
 
 }
