@@ -2,7 +2,6 @@ package ru.practicum.main.service.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main.dto.user.NewUserRequest;
@@ -23,18 +22,25 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
     @Override
-    public List<UserDto> getUsers(List<Long> ids, int from, int size) {
+    public List<UserDto> getUsers(List<Long> ids) {
+        log.debug("main-service - UserServiceImpl: Получен запрос на получение списка пользователей по id.");
+        log.trace("main-service - UserServiceImpl: Подробности запроса на получение списка пользователей: " +
+                "ids={}.", ids);
+
+        return repository.findAllById(ids)
+                .stream()
+                .map(UserMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<UserDto> getUsers(int from, int size) {
         log.debug("main-service - UserServiceImpl: Получен запрос на получение списка пользователей.");
         log.trace("main-service - UserServiceImpl: Подробности запроса на получение списка пользователей: " +
-                "ids={}, from={}, size={}.", ids, from, size);
+                "from={}, size={}.", from, size);
 
-        PageRequest pageRequest = PageRequest.of(from / size, size);
-
-        List<User> result = ids == null ?
-                repository.findAll(PageRequest.of(from / size, size)).toList() :
-                repository.findAllById(ids);
-
-        return result.stream()
+        return repository.findAll(from, size)
+                .stream()
                 .map(UserMapper::toDto)
                 .toList();
     }
