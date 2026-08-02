@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ParticipationRequestDto {
-    private long id;
-    private long event;
-    private long requester;
+    private Long id;
+    private Long event;
+    private Long requester;
     RequestStatus status;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime created;

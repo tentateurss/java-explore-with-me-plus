@@ -4,13 +4,17 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.main.enums.EventStateUserAction;
 import ru.practicum.main.validation.NullOrNotBlank;
 
 import java.time.LocalDateTime;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UpdateEventUserRequest {
     @NullOrNotBlank(message = "Заголовок события не может быть пустым." +
             "Если не требуется обновлять данное поле, не указывайте его.")

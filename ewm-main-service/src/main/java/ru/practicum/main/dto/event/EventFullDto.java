@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EventFullDto {
-    private long id;
+    private Long id;
 
     private String title;
     private String annotation;
@@ -20,7 +20,7 @@ public class EventFullDto {
 
     private CategoryDto category;
 
-    private boolean paid;
+    private Boolean paid;
 
     private EventState state;
 
@@ -37,11 +37,11 @@ public class EventFullDto {
 
     private UserShortDto initiator;
 
-    private int participantLimit;
+    private Integer participantLimit;
 
-    private long confirmedRequests;
+    private Long confirmedRequests;
 
-    private long views;
+    private Long views;
 
-    private boolean requestModeration;
+    private Boolean requestModeration;
 }
