@@ -1,7 +1,6 @@
 package ru.practicum.main.service.event;
 
-import ru.practicum.main.dto.*;
-import ru.practicum.main.enums.EventState;
+import ru.practicum.main.dto.event.*;
 
 import java.util.List;
 

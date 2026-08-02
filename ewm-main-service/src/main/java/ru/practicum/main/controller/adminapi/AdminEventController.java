@@ -4,9 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.main.dto.EventFullDto;
-import ru.practicum.main.dto.UpdateEventAdminRequest;
-import ru.practicum.main.enums.EventState;
+import ru.practicum.main.dto.event.EventFullDto;
+import ru.practicum.main.dto.event.UpdateEventAdminRequest;
 import ru.practicum.main.service.event.EventService;
 
 import java.util.List;
