@@ -2,6 +2,7 @@ package ru.practicum.main.controller.adminapi;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.dto.event.EventFullDto;
@@ -10,6 +11,7 @@ import ru.practicum.main.service.event.EventService;
 
 import java.util.List;
 
+@Slf4j
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -26,6 +28,8 @@ public class AdminEventController {
                                         @RequestParam(required = false) String rangeEnd,
                                         @RequestParam(required = false, defaultValue = "0") Integer from,
                                         @RequestParam(required = false, defaultValue = "10") Integer size) {
+        log.info("main-server - AdminEventController: Выполняем поиск события по параметрам users={}, states={}, categories={}, rangeStart={}, rangeEnd={}, from={}, size={}",
+                users, states, categories, rangeStart, rangeEnd, from, size);
         return eventService.getEventsWithParameters(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
@@ -33,6 +37,7 @@ public class AdminEventController {
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable Long eventId,
                                     @Valid @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
+        log.info("main-server - AdminEventController: Обновляем событие eventId={}", eventId);
         return eventService.updateEvent(eventId, updateEventAdminRequest);
     }
 

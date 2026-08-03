@@ -70,7 +70,10 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         ParticipationRequest request = requestRepository.findByIdAndRequesterId(requestId, userId);
-        request.setStatus(RequestStatus.REJECTED);
+        if (request == null) {
+            throw new NotFoundException("Заявка не найдена или не принадлежит пользователю");
+        }
+        request.setStatus(RequestStatus.CANCELED);
         return ParticipationRequestMapper.toDto(requestRepository.save(request));
     }
 
@@ -98,7 +101,46 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         //Вот это нужно доделать
 
-        return;
+        List<ParticipationRequest> confirmed = new ArrayList<>();
+        List<ParticipationRequest> rejected = new ArrayList<>();
+        long confirmedCount = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+        int limit = event.getParticipantLimit();
+
+        for (Long requestId : dto.getRequestIds()) {
+            ParticipationRequest request = requestRepository.findById(requestId)
+                    .orElseThrow(() -> new NotFoundException("Заявка не найдена"));
+
+            if (request.getStatus() != RequestStatus.PENDING) {
+                throw new ConflictException("Статус заявки должен быть PENDING");
+            }
+
+            if (dto.getStatus() == RequestStatus.CONFIRMED) {
+                if (limit == 0 || confirmedCount < limit) {
+                    request.setStatus(RequestStatus.CONFIRMED);
+                    confirmed.add(request);
+                    confirmedCount++;
+                } else {
+                    request.setStatus(RequestStatus.REJECTED);
+                    rejected.add(request);
+                }
+            } else {
+                request.setStatus(RequestStatus.REJECTED);
+                rejected.add(request);
+            }
+        }
+
+        requestRepository.saveAll(confirmed);
+        requestRepository.saveAll(rejected);
+
+        EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult();
+        result.setConfirmedRequests(confirmed.stream()
+                .map(ParticipationRequestMapper::toDto)
+                .collect(Collectors.toSet()));
+        result.setRejectedRequests(rejected.stream()
+                .map(ParticipationRequestMapper::toDto)
+                .collect(Collectors.toSet()));
+
+        return result;
     }
 
     private void checkUserExist(Long userId) {

@@ -2,6 +2,7 @@ package ru.practicum.main.controller.privateapi;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import ru.practicum.main.service.request.ParticipationRequestService;
 
 import java.util.List;
 
+@Slf4j
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -22,6 +24,8 @@ public class PrivateRequestController {
     //GET /users/{userId}/requests
     @GetMapping("/requests")
     public List<ParticipationRequestDto> getUserRequests(@PathVariable Long userId) {
+        log.info("main-server - PrivateRequestController: Получаем все запросы пользователя userId={}",
+                userId);
         return requestService.getUserRequests(userId);
     }
 
@@ -30,6 +34,8 @@ public class PrivateRequestController {
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto createRequest(@PathVariable Long userId,
                                                  @RequestParam Long eventId) {
+        log.info("main-server - PrivateRequestController: Создаём запрос по событию eventId={} пользователя userId={}",
+                eventId, userId);
         return requestService.createRequest(userId, eventId);
     }
 
@@ -37,6 +43,8 @@ public class PrivateRequestController {
     @PatchMapping("/requests/{requestId}/cancel")
     public ParticipationRequestDto cancelRequest(@PathVariable Long userId,
                                                  @PathVariable Long requestId) {
+        log.info("main-server - PrivateRequestController: Отменяем запрос requestId={} пользователя userId={}",
+                requestId, userId);
         return requestService.cancelRequest(userId, requestId);
     }
 
@@ -44,6 +52,8 @@ public class PrivateRequestController {
     @GetMapping("/events/{eventId}/requests")
     public List<ParticipationRequestDto> getEventRequests(@PathVariable Long userId,
                               @PathVariable Long eventId) {
+        log.info("main-server - PrivateRequestController: Получаем запросы по событию eventId={} пользователя userId={}",
+                eventId, userId);
         return requestService.getEventRequests(userId, eventId);
     }
 
@@ -52,6 +62,8 @@ public class PrivateRequestController {
     public EventRequestStatusUpdateResult changeRequestStatus(@PathVariable Long userId,
                                                               @PathVariable Long eventId,
                                                               @Valid @RequestBody EventRequestStatusUpdateRequest statusUpdateResult) {
+        log.info("main-server - PrivateRequestController: Меняем статус запросов события eventId={} пользователя userId={}",
+                eventId, userId);
         return requestService.changeRequestStatus(userId, eventId, statusUpdateResult);
     }
 
