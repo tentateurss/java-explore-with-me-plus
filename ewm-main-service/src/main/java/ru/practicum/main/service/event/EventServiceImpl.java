@@ -186,10 +186,20 @@ public class EventServiceImpl implements EventService {
                                                       String rangeEnd, Integer from, Integer size) {
         log.debug("Getting events with parameters: users={}, states={}, categories={}", users, states, categories);
 
+        if (from == null) from = 0;
+        if (size == null) size = 10;
+
         Pageable pageable = PageRequest.of(from / size, size);
 
-        LocalDateTime start = rangeStart != null ? LocalDateTime.parse(rangeStart, FORMATTER) : null;
-        LocalDateTime end = rangeEnd != null ? LocalDateTime.parse(rangeEnd, FORMATTER) : null;
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+
+        if (rangeStart != null && !rangeStart.isBlank()) {
+            start = LocalDateTime.parse(rangeStart, FORMATTER);
+        }
+        if (rangeEnd != null && !rangeEnd.isBlank()) {
+            end = LocalDateTime.parse(rangeEnd, FORMATTER);
+        }
 
         List<EventState> stateEnums = null;
         if (states != null && !states.isEmpty()) {

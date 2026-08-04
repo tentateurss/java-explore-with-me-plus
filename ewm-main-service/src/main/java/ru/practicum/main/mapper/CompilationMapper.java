@@ -16,19 +16,11 @@ import java.util.stream.Collectors;
 @UtilityClass
 public class CompilationMapper {
 
-    /**
-     *
-     * @param compilation
-     * @param stats Map<Long, EventStatistics>,
-     *              где Long - идентификатор события,
-     *              а EventStatistics - обертка с данными о количестве подтвержденных заявок (confirmedRequests)
-     *              и количестве просмотров события (views)
-     */
     public CompilationDto toDto(Compilation compilation, Map<Long, EventStatistics> stats) {
         CompilationDto dto = new CompilationDto();
 
         dto.setId(compilation.getId());
-        dto.setTitle(compilation.getTitle());
+        dto.setTitle(compilation.getTitle() != null ? compilation.getTitle().trim() : null);
         dto.setEvents(compilation.getEvents()
                 .stream()
                 .map(event -> EventMapper.toShortDto(event,
@@ -42,7 +34,7 @@ public class CompilationMapper {
     public Compilation toEntity(NewCompilationDto dto, Set<Event> events) {
         Compilation compilation = new Compilation();
 
-        compilation.setTitle(dto.getTitle().trim());
+        compilation.setTitle(dto.getTitle() != null ? dto.getTitle().trim() : null);
         compilation.setPinned(dto.isPinned());
         compilation.setEvents(events);
 
