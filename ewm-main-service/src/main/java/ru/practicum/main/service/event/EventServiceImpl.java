@@ -25,6 +25,7 @@ import ru.practicum.main.repository.EventRepository;
 import ru.practicum.main.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
@@ -173,8 +176,12 @@ public class EventServiceImpl implements EventService {
         log.debug("Getting events with parameters: users={}, states={}, categories={}", users, states, categories);
 
         Pageable pageable = PageRequest.of(from / size, size);
+
+        LocalDateTime start = rangeStart != null ? LocalDateTime.parse(rangeStart, FORMATTER) : null;
+        LocalDateTime end = rangeEnd != null ? LocalDateTime.parse(rangeEnd, FORMATTER) : null;
+
         List<Event> events = eventRepository.findEventsWithFilters(
-                users, states, categories, rangeStart, rangeEnd, pageable);
+                users, states, categories, start, end, pageable);
 
         return events.stream()
                 .map(event -> EventMapper.toFullDto(event, new EventStatistics(0, 0)))

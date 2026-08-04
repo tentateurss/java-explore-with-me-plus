@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.main.enums.EventState;
 import ru.practicum.main.model.Event;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,8 +34,8 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
             @Param("users") List<Long> users,
             @Param("states") List<String> states,
             @Param("categories") List<Long> categories,
-            @Param("rangeStart") String rangeStart,
-            @Param("rangeEnd") String rangeEnd,
+            @Param("rangeStart") LocalDateTime rangeStart,
+            @Param("rangeEnd") LocalDateTime rangeEnd,
             Pageable pageable
     );
 }
