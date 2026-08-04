@@ -7,16 +7,16 @@ import ru.practicum.main.model.ParticipationRequest;
 
 import java.util.List;
 
-//Заглушка (или нет)
 @Repository
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
-    List<ParticipationRequest> findAllByRequesterId(Long userId);
 
-    boolean existsByRequesterIdAndEventId(Long userId, Long eventId);
+    List<ParticipationRequest> findAllByRequestorId(Long userId);
+
+    boolean existsByRequestorIdAndEventId(Long userId, Long eventId);
 
     long countByEventIdAndStatus(Long eventId, RequestStatus status);
 
-    ParticipationRequest findByIdAndRequesterId(Long requestId, Long userId);
+    ParticipationRequest findByIdAndRequestorId(Long requestId, Long userId);
 
     List<ParticipationRequest> findAllByEventId(Long eventId);
 }

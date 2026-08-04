@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.main.dto.error.ApiError;
 
+import java.util.stream.Collectors;
+
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
@@ -26,11 +28,21 @@ public class ErrorHandler {
         return new ApiError(HttpStatus.CONFLICT, "Conflict", e.getMessage());
     }
 
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleBadRequest(BadRequestException e) {
+        log.warn("Bad request: {}", e.getMessage());
+        return new ApiError(HttpStatus.BAD_REQUEST, "Bad request", e.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidation(MethodArgumentNotValidException e) {
         log.warn("Validation error: {}", e.getMessage());
-        return new ApiError(HttpStatus.BAD_REQUEST, "Invalid request data", e.getMessage());
+        String message = e.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        return new ApiError(HttpStatus.BAD_REQUEST, "Invalid request data", message);
     }
 
     @ExceptionHandler(Exception.class)

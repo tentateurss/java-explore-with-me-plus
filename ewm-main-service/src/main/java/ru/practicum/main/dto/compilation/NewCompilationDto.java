@@ -15,7 +15,6 @@ public class NewCompilationDto {
     @Size(max = 50, message = "Название подборки не может быть больше 50 символов.")
     private String title;
 
-    @NotEmpty(message = "Должен быть указан хотя бы один идентификатор события для создания подборки.")
     private Set<@NotNull(message = "Идентификатору события должно быть присвоено значение.") Long> events;
 
     private boolean pinned;

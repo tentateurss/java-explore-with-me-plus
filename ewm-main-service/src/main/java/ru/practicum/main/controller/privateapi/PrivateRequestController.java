@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.main.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.main.dto.request.ParticipationRequestDto;
+import ru.practicum.main.exception.BadRequestException;
 import ru.practicum.main.service.request.ParticipationRequestService;
 
 import java.util.List;
@@ -33,9 +34,10 @@ public class PrivateRequestController {
     @PostMapping("/requests")
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto createRequest(@PathVariable Long userId,
-                                                 @RequestParam Long eventId) {
-        log.info("main-server - PrivateRequestController: Создаём запрос по событию eventId={} пользователя userId={}",
-                eventId, userId);
+                                                 @RequestParam(required = false) Long eventId) {
+        if (eventId == null) {
+            throw new BadRequestException("eventId parameter is required");
+        }
         return requestService.createRequest(userId, eventId);
     }
 

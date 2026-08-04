@@ -6,4 +6,6 @@ import ru.practicum.main.model.Category;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
+
+    boolean existsByNameIgnoreCase(String name);
 }

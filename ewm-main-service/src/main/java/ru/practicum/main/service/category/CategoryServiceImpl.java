@@ -44,6 +44,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto createCategory(NewCategoryDto dto) {
+        String trimmedName = dto.getName().trim();
+        if (categoryRepository.existsByNameIgnoreCase(trimmedName)) {
+            throw new ConflictException("Category with name '" + trimmedName + "' already exists");
+        }
+
         Category category = CategoryMapper.toEntity(dto);
         Category saved = categoryRepository.save(category);
         log.info("Категория создана: {}", saved.getName());
@@ -51,9 +56,17 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public CategoryDto updateCategory(Long id, NewCategoryDto dto) {
         Category category = findCategoryById(id);
-        category.setName(dto.getName());
+
+        String trimmedName = dto.getName().trim();
+        if (!category.getName().equalsIgnoreCase(trimmedName) &&
+                categoryRepository.existsByNameIgnoreCase(trimmedName)) {
+            throw new ConflictException("Category with name '" + trimmedName + "' already exists");
+        }
+
+        category.setName(trimmedName);
         Category updated = categoryRepository.save(category);
         log.info("Категория обновлена: {}", updated.getName());
         return CategoryMapper.toDto(updated);
