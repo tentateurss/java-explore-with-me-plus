@@ -32,7 +32,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
             "AND (COALESCE(:rangeEnd, e.eventDate) IS NULL OR e.eventDate <= :rangeEnd)")
     List<Event> findEventsWithFilters(
             @Param("users") List<Long> users,
-            @Param("states") List<String> states,
+            @Param("states") List<EventState> states,
             @Param("categories") List<Long> categories,
             @Param("rangeStart") LocalDateTime rangeStart,
             @Param("rangeEnd") LocalDateTime rangeEnd,

@@ -25,11 +25,16 @@ import ru.practicum.main.repository.CategoryRepository;
 import ru.practicum.main.repository.EventRepository;
 import ru.practicum.main.repository.ParticipationRequestRepository;
 import ru.practicum.main.repository.UserRepository;
+import ru.practicum.stats.client.StatsClient;
+import ru.practicum.stats.dto.ViewStats;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static ru.practicum.stats.dto.util.DateTimeFormatters.STANDARD;
 
 @Slf4j
 @Service
@@ -43,6 +48,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ParticipationRequestRepository participationRequestRepository;
+    private final StatsClient statsClient;
 
     @Override
     public List<EventShortDto> getEvents(Long userId, Integer from, Integer size) {
@@ -51,8 +57,10 @@ public class EventServiceImpl implements EventService {
         Pageable pageable = PageRequest.of(from / size, size);
         List<Event> events = eventRepository.findAllByInitiatorId(userId, pageable);
 
+        Map<Long, EventStatistics> statsMap = getEventStatistics(events);
+
         return events.stream()
-                .map(event -> EventMapper.toShortDto(event, new EventStatistics(0, 0)))
+                .map(event -> EventMapper.toShortDto(event, statsMap.getOrDefault(event.getId(), new EventStatistics(0, 0))))
                 .collect(Collectors.toList());
     }
 
@@ -73,7 +81,7 @@ public class EventServiceImpl implements EventService {
 
         log.info("Event created: id={}, title={}", event.getId(), event.getTitle());
 
-        return EventMapper.toFullDto(event, new EventStatistics(0, 0));
+        return EventMapper.toFullDto(event, getEventStatistics(List.of(event)).getOrDefault(event.getId(), new EventStatistics(0, 0)));
     }
 
     @Override
@@ -83,7 +91,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " not found"));
 
-        return EventMapper.toFullDto(event, new EventStatistics(0, 0));
+        return EventMapper.toFullDto(event, getEventStatistics(List.of(event)).getOrDefault(eventId, new EventStatistics(0, 0)));
     }
 
     @Override
@@ -125,7 +133,7 @@ public class EventServiceImpl implements EventService {
 
         log.info("Event updated by user: id={}, state={}", event.getId(), event.getState());
 
-        return EventMapper.toFullDto(event, new EventStatistics(0, 0));
+        return EventMapper.toFullDto(event, getEventStatistics(List.of(event)).getOrDefault(eventId, new EventStatistics(0, 0)));
     }
 
     @Override
@@ -150,7 +158,7 @@ public class EventServiceImpl implements EventService {
         if (request.getStateAction() != null) {
             switch (request.getStateAction()) {
                 case PUBLISH_EVENT:
-                    if (!"PENDING".equals(event.getState().name())) {
+                    if (event.getState() != EventState.PENDING) {
                         throw new ConflictException("Cannot publish event that is not in PENDING state");
                     }
                     event.setState(EventState.PUBLISHED);
@@ -169,7 +177,7 @@ public class EventServiceImpl implements EventService {
 
         log.info("Event updated by admin: id={}, state={}", event.getId(), event.getState());
 
-        return EventMapper.toFullDto(event, new EventStatistics(0, 0));
+        return EventMapper.toFullDto(event, getEventStatistics(List.of(event)).getOrDefault(eventId, new EventStatistics(0, 0)));
     }
 
     @Override
@@ -183,17 +191,88 @@ public class EventServiceImpl implements EventService {
         LocalDateTime start = rangeStart != null ? LocalDateTime.parse(rangeStart, FORMATTER) : null;
         LocalDateTime end = rangeEnd != null ? LocalDateTime.parse(rangeEnd, FORMATTER) : null;
 
+        List<EventState> stateEnums = null;
+        if (states != null && !states.isEmpty()) {
+            stateEnums = states.stream()
+                    .map(state -> {
+                        try {
+                            return EventState.valueOf(state);
+                        } catch (IllegalArgumentException e) {
+                            throw new BadRequestException("Invalid state: " + state);
+                        }
+                    })
+                    .collect(Collectors.toList());
+        }
+
         List<Event> events = eventRepository.findEventsWithFilters(
-                users, states, categories, start, end, pageable);
+                users, stateEnums, categories, start, end, pageable);
+
+        Map<Long, EventStatistics> statsMap = getEventStatistics(events);
 
         return events.stream()
-                .map(event -> {
-                    long confirmedRequests = participationRequestRepository
-                            .countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);
-                    long views = 0L;
-                    return EventMapper.toFullDto(event, new EventStatistics(confirmedRequests, views));
-                })
+                .map(event -> EventMapper.toFullDto(event, statsMap.getOrDefault(event.getId(), new EventStatistics(0, 0))))
                 .collect(Collectors.toList());
+    }
+
+    private Map<Long, EventStatistics> getEventStatistics(List<Event> events) {
+        if (events == null || events.isEmpty()) {
+            return Map.of();
+        }
+
+        try {
+            Map<Long, Long> confirmedRequestsMap = events.stream()
+                    .collect(Collectors.toMap(
+                            Event::getId,
+                            event -> participationRequestRepository
+                                    .countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED)
+                    ));
+
+            List<String> uris = events.stream()
+                    .map(event -> "/events/" + event.getId())
+                    .collect(Collectors.toList());
+
+            LocalDateTime start = LocalDateTime.of(2020, 1, 1, 0, 0, 0);
+            LocalDateTime end = LocalDateTime.now().plusDays(1);
+
+            List<ViewStats> viewStats = statsClient.getStats(
+                    start.format(STANDARD),
+                    end.format(STANDARD),
+                    uris.toArray(new String[0]),
+                    true
+            ).getBody();
+
+            Map<Long, Long> viewsMap = Map.of();
+            if (viewStats != null && !viewStats.isEmpty()) {
+                viewsMap = viewStats.stream()
+                        .collect(Collectors.toMap(
+                                stat -> extractEventIdFromUri(stat.getUri()),
+                                ViewStats::getHits
+                        ));
+            }
+
+            Map<Long, Long> finalViewsMap = viewsMap;
+            return events.stream()
+                    .collect(Collectors.toMap(
+                            Event::getId,
+                            event -> new EventStatistics(
+                                    confirmedRequestsMap.getOrDefault(event.getId(), 0L),
+                                    finalViewsMap.getOrDefault(event.getId(), 0L)
+                            )
+                    ));
+
+        } catch (Exception e) {
+            log.error("Ошибка при получении статистики из сервиса статистики", e);
+            return events.stream()
+                    .collect(Collectors.toMap(
+                            Event::getId,
+                            event -> new EventStatistics(0L, 0L)
+                    ));
+        }
+    }
+
+    private Long extractEventIdFromUri(String uri) {
+        String[] parts = uri.split("/");
+        return Long.parseLong(parts[parts.length - 1]);
     }
 
     private User getUserById(Long userId) {

@@ -19,6 +19,7 @@ import ru.practicum.main.mapper.EventMapper;
 import ru.practicum.main.model.Event;
 import ru.practicum.main.model.ParticipationRequest;
 import ru.practicum.main.repository.EventRepository;
+import ru.practicum.main.repository.ParticipationRequestRepository;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.ViewStats;
 
@@ -35,6 +36,7 @@ import static ru.practicum.stats.dto.util.DateTimeFormatters.STANDARD;
 public class PublicEventServiceImpl implements PublicEventService {
 
     private final EventRepository eventRepository;
+    private final ParticipationRequestRepository participationRequestRepository;
     private final StatsClient statsClient;
 
     @Override
@@ -147,6 +149,13 @@ public class PublicEventServiceImpl implements PublicEventService {
         }
 
         try {
+            Map<Long, Long> confirmedRequestsMap = events.stream()
+                    .collect(Collectors.toMap(
+                            Event::getId,
+                            event -> participationRequestRepository
+                                    .countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED)
+                    ));
+
             List<String> uris = events.stream()
                     .map(event -> "/events/" + event.getId())
                     .collect(Collectors.toList());
@@ -165,27 +174,25 @@ public class PublicEventServiceImpl implements PublicEventService {
 
             log.info("=== VIEW STATS RESPONSE: {}", viewStats);
 
-            if (viewStats == null || viewStats.isEmpty()) {
-                log.warn("=== STATS RESPONSE IS EMPTY, returning default values");
-                return events.stream()
+            Map<Long, Long> viewsMap = Map.of();
+            if (viewStats != null && !viewStats.isEmpty()) {
+                viewsMap = viewStats.stream()
                         .collect(Collectors.toMap(
-                                Event::getId,
-                                event -> new EventStatistics(0L, 0L)
+                                stat -> extractEventIdFromUri(stat.getUri()),
+                                ViewStats::getHits
                         ));
             }
 
-            Map<Long, Long> viewsMap = viewStats.stream()
-                    .collect(Collectors.toMap(
-                            stat -> extractEventIdFromUri(stat.getUri()),
-                            ViewStats::getHits
-                    ));
-
             log.info("=== VIEWS MAP: {}", viewsMap);
 
+            Map<Long, Long> finalViewsMap = viewsMap;
             return events.stream()
                     .collect(Collectors.toMap(
                             Event::getId,
-                            event -> new EventStatistics(0L, viewsMap.getOrDefault(event.getId(), 0L))
+                            event -> new EventStatistics(
+                                    confirmedRequestsMap.getOrDefault(event.getId(), 0L),
+                                    finalViewsMap.getOrDefault(event.getId(), 0L)
+                            )
                     ));
 
         } catch (Exception e) {
