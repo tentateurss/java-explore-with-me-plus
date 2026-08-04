@@ -1,13 +1,10 @@
 package ru.practicum.main.service.event;
 
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.practicum.main.dto.event.EventFullDto;
 import ru.practicum.main.dto.event.EventShortDto;
@@ -17,7 +14,6 @@ import ru.practicum.main.enums.RequestStatus;
 import ru.practicum.main.exception.NotFoundException;
 import ru.practicum.main.mapper.EventMapper;
 import ru.practicum.main.model.Event;
-import ru.practicum.main.model.ParticipationRequest;
 import ru.practicum.main.repository.EventRepository;
 import ru.practicum.main.repository.ParticipationRequestRepository;
 import ru.practicum.stats.client.StatsClient;
@@ -54,8 +50,6 @@ public class PublicEventServiceImpl implements PublicEventService {
             rangeStart = LocalDateTime.now();
         }
 
-        Specification<Event> spec = createSpec(text, categories, paid, rangeStart, rangeEnd, onlyAvailable);
-
         PageRequest pageRequest;
         if ("EVENT_DATE".equals(sort)) {
             pageRequest = PageRequest.of(from / size, size, Sort.by("eventDate").ascending());
@@ -63,7 +57,41 @@ public class PublicEventServiceImpl implements PublicEventService {
             pageRequest = PageRequest.of(from / size, size);
         }
 
-        List<Event> events = eventRepository.findAll(spec, pageRequest).getContent();
+        List<Event> events = eventRepository.findEventsWithFilters(
+                null,
+                List.of(EventState.PUBLISHED),
+                categories,
+                rangeStart,
+                rangeEnd,
+                pageRequest
+        );
+
+        if (text != null && !text.isBlank()) {
+            String searchText = text.toLowerCase();
+            events = events.stream()
+                    .filter(event ->
+                            event.getAnnotation().toLowerCase().contains(searchText) ||
+                                    event.getDescription().toLowerCase().contains(searchText)
+                    )
+                    .collect(Collectors.toList());
+        }
+
+        if (paid != null) {
+            events = events.stream()
+                    .filter(event -> event.getPaid().equals(paid))
+                    .collect(Collectors.toList());
+        }
+
+        if (onlyAvailable != null && onlyAvailable) {
+            events = events.stream()
+                    .filter(event -> {
+                        if (event.getParticipantLimit() == 0) return true;
+                        long confirmed = participationRequestRepository
+                                .countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);
+                        return confirmed < event.getParticipantLimit();
+                    })
+                    .collect(Collectors.toList());
+        }
 
         Map<Long, EventStatistics> statsMap = getEventStatistics(events);
 
@@ -91,56 +119,6 @@ public class PublicEventServiceImpl implements PublicEventService {
         EventStatistics stats = statsMap.getOrDefault(id, new EventStatistics(0, 0));
 
         return EventMapper.toFullDto(event, stats);
-    }
-
-    private Specification<Event> createSpec(String text, List<Long> categories, Boolean paid,
-                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable) {
-
-        Specification<Event> spec = Specification.where(
-                (root, query, cb) -> cb.equal(root.get("state"), EventState.PUBLISHED)
-        );
-
-        if (text != null && !text.isBlank()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.or(
-                            cb.like(cb.lower(root.get("annotation")), "%" + text.toLowerCase() + "%"),
-                            cb.like(cb.lower(root.get("description")), "%" + text.toLowerCase() + "%")
-                    )
-            );
-        }
-
-        if (categories != null && !categories.isEmpty()) {
-            spec = spec.and((root, query, cb) -> root.get("category").get("id").in(categories));
-        }
-
-        if (paid != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("paid"), paid));
-        }
-
-        if (rangeStart != null) {
-            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("eventDate"), rangeStart));
-        }
-        if (rangeEnd != null) {
-            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("eventDate"), rangeEnd));
-        }
-
-        if (onlyAvailable != null && onlyAvailable) {
-            spec = spec.and((root, query, cb) -> {
-                Subquery<Long> subquery = query.subquery(Long.class);
-                Root<ParticipationRequest> requestRoot = subquery.from(ParticipationRequest.class);
-                subquery.select(cb.count(requestRoot))
-                        .where(
-                                cb.equal(requestRoot.get("event"), root),
-                                cb.equal(requestRoot.get("status"), RequestStatus.CONFIRMED)
-                        );
-                return cb.or(
-                        cb.equal(root.get("participantLimit"), 0),
-                        cb.lessThan(subquery, root.get("participantLimit"))
-                );
-            });
-        }
-
-        return spec;
     }
 
     private Map<Long, EventStatistics> getEventStatistics(List<Event> events) {
