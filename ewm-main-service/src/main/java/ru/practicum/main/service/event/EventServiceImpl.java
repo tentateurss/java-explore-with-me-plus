@@ -39,8 +39,11 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getEvents(Long userId, Integer from, Integer size) {
+        log.debug("Getting events for user id={}, from={}, size={}", userId, from, size);
+
         Pageable pageable = PageRequest.of(from / size, size);
         List<Event> events = eventRepository.findAllByInitiatorId(userId, pageable);
+
         return events.stream()
                 .map(event -> EventMapper.toShortDto(event, new EventStatistics(0, 0)))
                 .collect(Collectors.toList());
@@ -49,6 +52,8 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
+        log.debug("Creating event for user id={}", userId);
+
         User user = getUserById(userId);
         Category category = getCategoryById(newEventDto.getCategory());
 
@@ -59,21 +64,28 @@ public class EventServiceImpl implements EventService {
         Event event = EventMapper.toEntity(newEventDto, category, user);
         event = eventRepository.save(event);
 
+        log.info("Event created: id={}, title={}", event.getId(), event.getTitle());
+
         return EventMapper.toFullDto(event, new EventStatistics(0, 0));
     }
 
     @Override
     public EventFullDto getEvent(Long userId, Long eventId) {
+        log.debug("Getting event id={} for user id={}", eventId, userId);
+
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
+                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " not found"));
+
         return EventMapper.toFullDto(event, new EventStatistics(0, 0));
     }
 
     @Override
     @Transactional
     public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest request) {
+        log.debug("Updating event id={} by user id={}", eventId, userId);
+
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
+                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " not found"));
 
         if (event.getState() != EventState.PENDING && event.getState() != EventState.CANCELED) {
             throw new ConflictException("Only pending or canceled events can be changed");
@@ -92,12 +104,16 @@ public class EventServiceImpl implements EventService {
         EventMapper.updateEntity(request, event, category);
         event = eventRepository.save(event);
 
+        log.info("Event updated: id={}, title={}", event.getId(), event.getTitle());
+
         return EventMapper.toFullDto(event, new EventStatistics(0, 0));
     }
 
     @Override
     @Transactional
     public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest request) {
+        log.debug("Updating event id={} by admin", eventId);
+
         Event event = getEventById(eventId);
 
         Category category = null;
@@ -131,6 +147,9 @@ public class EventServiceImpl implements EventService {
         }
 
         event = eventRepository.save(event);
+
+        log.info("Event updated by admin: id={}, state={}", event.getId(), event.getState());
+
         return EventMapper.toFullDto(event, new EventStatistics(0, 0));
     }
 
@@ -138,9 +157,12 @@ public class EventServiceImpl implements EventService {
     public List<EventFullDto> getEventsWithParameters(List<Long> users, List<String> states,
                                                       List<Long> categories, String rangeStart,
                                                       String rangeEnd, Integer from, Integer size) {
+        log.debug("Getting events with parameters: users={}, states={}, categories={}", users, states, categories);
+
         Pageable pageable = PageRequest.of(from / size, size);
         List<Event> events = eventRepository.findEventsWithFilters(
                 users, states, categories, rangeStart, rangeEnd, pageable);
+
         return events.stream()
                 .map(event -> EventMapper.toFullDto(event, new EventStatistics(0, 0)))
                 .collect(Collectors.toList());
@@ -148,16 +170,16 @@ public class EventServiceImpl implements EventService {
 
     private User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User with id=" + userId + " not found"));
     }
 
     private Category getCategoryById(Long categoryId) {
         return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException("Category not found"));
+                .orElseThrow(() -> new NotFoundException("Category with id=" + categoryId + " not found"));
     }
 
     private Event getEventById(Long eventId) {
         return eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
+                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " not found"));
     }
 }

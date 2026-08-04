@@ -13,11 +13,7 @@ import java.time.LocalDateTime;
 
 @UtilityClass
 public class EventMapper {
-    /**
-     * @param event сущность события
-     * @param stats класс-обертка, содержащая информацию о количестве подтвержденных заявок (confirmedRequests)
-     *             и количестве просмотров события (views)
-     */
+
     public EventFullDto toFullDto(Event event, EventStatistics stats) {
         EventFullDto dto = new EventFullDto();
 
@@ -28,24 +24,23 @@ public class EventMapper {
         dto.setCategory(CategoryMapper.toDto(event.getCategory()));
         dto.setPaid(event.getPaid());
         dto.setState(event.getState());
-        dto.setLocation(new LocationDto(event.getLocation().getLat(), event.getLocation().getLon()));
+
+        if (event.getLocation() != null) {
+            dto.setLocation(new LocationDto(event.getLocation().getLat(), event.getLocation().getLon()));
+        }
+
         dto.setEventDate(event.getEventDate());
         dto.setCreatedOn(event.getCreatedOn());
         dto.setPublishedOn(event.getPublishedOn());
         dto.setInitiator(UserMapper.toShortDto(event.getInitiator()));
         dto.setParticipantLimit(event.getParticipantLimit());
-        dto.setConfirmedRequests(stats.getConfirmedRequests());
-        dto.setViews(stats.getViews());
+        dto.setConfirmedRequests(stats != null ? stats.getConfirmedRequests() : 0L);
+        dto.setViews(stats != null ? stats.getViews() : 0L);
         dto.setRequestModeration(event.getRequestModeration());
 
         return dto;
     }
 
-    /**
-     * @param event сущность события
-     * @param stats класс-обертка, содержащая информацию о количестве подтвержденных заявок (confirmedRequests)
-     *             и количестве просмотров события (views)
-     */
     public EventShortDto toShortDto(Event event, EventStatistics stats) {
         EventShortDto dto = new EventShortDto();
 
@@ -56,8 +51,8 @@ public class EventMapper {
         dto.setPaid(event.getPaid());
         dto.setEventDate(event.getEventDate());
         dto.setInitiator(UserMapper.toShortDto(event.getInitiator()));
-        dto.setConfirmedRequests(stats.getConfirmedRequests());
-        dto.setViews(stats.getViews());
+        dto.setConfirmedRequests(stats != null ? stats.getConfirmedRequests() : 0L);
+        dto.setViews(stats != null ? stats.getViews() : 0L);
 
         return dto;
     }
@@ -70,7 +65,11 @@ public class EventMapper {
         event.setDescription(dto.getDescription());
         event.setCategory(category);
         event.setEventDate(dto.getEventDate());
-        event.setLocation(new Location(dto.getLocation().getLat(), dto.getLocation().getLon()));
+
+        if (dto.getLocation() != null) {
+            event.setLocation(new Location(dto.getLocation().getLat(), dto.getLocation().getLon()));
+        }
+
         event.setPaid(dto.isPaid());
         event.setParticipantLimit(dto.getParticipantLimit());
         event.setRequestModeration(dto.getRequestModeration() == null || dto.getRequestModeration());
