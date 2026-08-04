@@ -22,12 +22,36 @@ public class StatsController {
 
     @GetMapping("/stats")
     @ResponseStatus(HttpStatus.OK)
-    List<ViewStats> getStats(@RequestParam @DateTimeFormat(pattern = DateTimeFormatters.PATTERN) LocalDateTime start,
-                             @RequestParam @DateTimeFormat(pattern = DateTimeFormatters.PATTERN) LocalDateTime end,
-                             @RequestParam(required = false) List<String> uris,
-                             @RequestParam(defaultValue = "false") boolean unique) {
+    public List<ViewStats> getStats(
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = DateTimeFormatters.PATTERN)
+            LocalDateTime start,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = DateTimeFormatters.PATTERN)
+            LocalDateTime end,
+
+            @RequestParam(required = false)
+            List<String> uris,
+
+            @RequestParam(defaultValue = "false")
+            boolean unique) {
+
         log.info("stat-server - Controller: Получаем объекты статистики по параметрам: start {}, end {}, uris {}, unique {}",
                 start, end, uris, unique);
+
+        if (start == null) {
+            throw new IllegalArgumentException("Start date must be provided");
+        }
+
+        if (end == null) {
+            throw new IllegalArgumentException("End date must be provided");
+        }
+
+        if (start.isAfter(end)) {
+            throw new IllegalArgumentException("Start date cannot be after end date");
+        }
+
         return statsService.getStats(start, end, uris, unique);
     }
 
