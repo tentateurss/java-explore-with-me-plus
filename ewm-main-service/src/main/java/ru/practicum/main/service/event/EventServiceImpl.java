@@ -102,9 +102,21 @@ public class EventServiceImpl implements EventService {
         }
 
         EventMapper.updateEntity(request, event, category);
+
+        if (request.getStateAction() != null) {
+            switch (request.getStateAction()) {
+                case SEND_TO_REVIEW:
+                    event.setState(EventState.PENDING);
+                    break;
+                case CANCEL_REVIEW:
+                    event.setState(EventState.CANCELED);
+                    break;
+            }
+        }
+
         event = eventRepository.save(event);
 
-        log.info("Event updated: id={}, title={}", event.getId(), event.getTitle());
+        log.info("Event updated by user: id={}, state={}", event.getId(), event.getState());
 
         return EventMapper.toFullDto(event, new EventStatistics(0, 0));
     }
@@ -131,7 +143,7 @@ public class EventServiceImpl implements EventService {
         if (request.getStateAction() != null) {
             switch (request.getStateAction()) {
                 case PUBLISH_EVENT:
-                    if (event.getState() != EventState.PENDING) {
+                    if (!"PENDING".equals(event.getState().name())) {
                         throw new ConflictException("Cannot publish event that is not in PENDING state");
                     }
                     event.setState(EventState.PUBLISHED);
