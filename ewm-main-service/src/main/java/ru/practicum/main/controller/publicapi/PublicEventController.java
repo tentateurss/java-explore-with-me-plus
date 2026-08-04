@@ -46,6 +46,10 @@ public class PublicEventController {
             throw new BadRequestException("rangeStart must be before rangeEnd");
         }
 
+        if (sort != null && !sort.isEmpty() && !"EVENT_DATE".equals(sort) && !"VIEWS".equals(sort)) {
+            throw new BadRequestException("sort must be EVENT_DATE or VIEWS");
+        }
+
         return publicEventService.getAllEvents(text, categories, paid, rangeStart, rangeEnd,
                 onlyAvailable, sort, from, size, request);
     }

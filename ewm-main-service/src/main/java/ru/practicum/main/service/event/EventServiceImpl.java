@@ -13,6 +13,7 @@ import ru.practicum.main.dto.event.NewEventDto;
 import ru.practicum.main.dto.event.UpdateEventAdminRequest;
 import ru.practicum.main.dto.event.UpdateEventUserRequest;
 import ru.practicum.main.enums.EventState;
+import ru.practicum.main.exception.BadRequestException;
 import ru.practicum.main.exception.ConflictException;
 import ru.practicum.main.exception.NotFoundException;
 import ru.practicum.main.mapper.EventMapper;
@@ -58,7 +59,7 @@ public class EventServiceImpl implements EventService {
         Category category = getCategoryById(newEventDto.getCategory());
 
         if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ConflictException("Event date must be at least 2 hours from now");
+            throw new BadRequestException("Event date must be at least 2 hours from now");
         }
 
         Event event = EventMapper.toEntity(newEventDto, category, user);
@@ -93,7 +94,7 @@ public class EventServiceImpl implements EventService {
 
         if (request.getEventDate() != null &&
                 request.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ConflictException("Event date must be at least 2 hours from now");
+            throw new BadRequestException("Event date must be at least 2 hours from now");
         }
 
         Category category = null;

@@ -194,14 +194,19 @@ public class PublicEventServiceImpl implements PublicEventService {
 
     private void saveHit(HttpServletRequest request) {
         try {
+            String uri = request.getRequestURI();
+            String ip = request.getRemoteAddr();
+            log.debug("Saving hit: uri={}, ip={}", uri, ip);
+
             statsClient.saveHit(
                     "ewm-main-service",
-                    request.getRequestURI(),
-                    request.getRemoteAddr(),
+                    uri,
+                    ip,
                     LocalDateTime.now()
             );
+            log.debug("Hit saved successfully");
         } catch (Exception e) {
-            log.error("Ошибка при сохранении статистики запроса", e);
+            log.error("Failed to save hit for uri={}: {}", request.getRequestURI(), e.getMessage());
         }
     }
 }
