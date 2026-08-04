@@ -37,7 +37,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     public List<ParticipationRequestDto> getUserRequests(Long userId) {
         checkUserExist(userId);
-        return requestRepository.findAllByRequesterId(userId).stream()
+        return requestRepository.findAllByRequestorId(userId).stream()
                 .map(ParticipationRequestMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -48,7 +48,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         Event event = getEventById(eventId);
 
-        if (requestRepository.existsByRequesterIdAndEventId(userId, eventId)) {
+        if (requestRepository.existsByRequestorIdAndEventId(userId, eventId)) {
             throw new ConflictException("Реквест уже существует");
         }
 
@@ -87,7 +87,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         log.info("Cancelling request id={} for user id={}", requestId, userId);
 
-        ParticipationRequest request = requestRepository.findByIdAndRequesterId(requestId, userId);
+        ParticipationRequest request = requestRepository.findByIdAndRequestorId(requestId, userId);
         if (request == null) {
             throw new NotFoundException("Заявка не найдена или не принадлежит пользователю");
         }
