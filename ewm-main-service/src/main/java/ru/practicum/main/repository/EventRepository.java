@@ -28,8 +28,8 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
             "WHERE (:users IS NULL OR e.initiator.id IN :users) " +
             "AND (:states IS NULL OR e.state IN :states) " +
             "AND (:categories IS NULL OR e.category.id IN :categories) " +
-            "AND (:rangeStart IS NULL OR e.eventDate >= :rangeStart) " +
-            "AND (:rangeEnd IS NULL OR e.eventDate <= :rangeEnd)")
+            "AND (COALESCE(:rangeStart, e.eventDate) IS NULL OR e.eventDate >= :rangeStart) " +
+            "AND (COALESCE(:rangeEnd, e.eventDate) IS NULL OR e.eventDate <= :rangeEnd)")
     List<Event> findEventsWithFilters(
             @Param("users") List<Long> users,
             @Param("states") List<String> states,
