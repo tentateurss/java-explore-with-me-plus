@@ -189,10 +189,43 @@ public class EventServiceImpl implements EventService {
         if (from == null) from = 0;
         if (size == null) size = 10;
 
+        if (states != null && states.isEmpty()) {
+            states = null;
+        }
+        if (users != null && users.isEmpty()) {
+            users = null;
+        }
+        if (categories != null && categories.isEmpty()) {
+            categories = null;
+        }
+
         Pageable pageable = PageRequest.of(from / size, size);
 
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+
+        if (rangeStart != null && !rangeStart.isBlank()) {
+            start = LocalDateTime.parse(rangeStart, FORMATTER);
+        }
+        if (rangeEnd != null && !rangeEnd.isBlank()) {
+            end = LocalDateTime.parse(rangeEnd, FORMATTER);
+        }
+
+        List<EventState> stateEnums = null;
+        if (states != null && !states.isEmpty()) {
+            stateEnums = states.stream()
+                    .map(state -> {
+                        try {
+                            return EventState.valueOf(state);
+                        } catch (IllegalArgumentException e) {
+                            throw new BadRequestException("Invalid state: " + state);
+                        }
+                    })
+                    .collect(Collectors.toList());
+        }
+
         List<Event> events = eventRepository.findEventsWithFilters(
-                users, states, categories, rangeStart, rangeEnd, pageable);
+                users, stateEnums, categories, start, end, pageable);
 
         Map<Long, EventStatistics> statsMap = getEventStatistics(events);
 
