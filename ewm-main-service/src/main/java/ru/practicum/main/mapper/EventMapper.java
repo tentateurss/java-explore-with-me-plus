@@ -116,6 +116,10 @@ public class EventMapper {
         if (dto.getRequestModeration() != null) {
             event.setRequestModeration(dto.getRequestModeration());
         }
+
+        if (dto.getStateAction() != null) {
+            event.setState(dto.getStateAction().getAssociatedState());
+        }
     }
 
     public void updateEntity(UpdateEventUserRequest dto, Event event, @Nullable Category category) {
@@ -153,6 +157,10 @@ public class EventMapper {
 
         if (dto.getRequestModeration() != null) {
             event.setRequestModeration(dto.getRequestModeration());
+        }
+
+        if (dto.getStateAction() != null) {
+            event.setState(dto.getStateAction().getAssociatedState());
         }
     }
 }

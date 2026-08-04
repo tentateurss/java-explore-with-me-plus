@@ -13,6 +13,7 @@ import ru.practicum.main.dto.event.NewEventDto;
 import ru.practicum.main.dto.event.UpdateEventAdminRequest;
 import ru.practicum.main.dto.event.UpdateEventUserRequest;
 import ru.practicum.main.enums.EventState;
+import ru.practicum.main.enums.RequestStatus;
 import ru.practicum.main.exception.BadRequestException;
 import ru.practicum.main.exception.ConflictException;
 import ru.practicum.main.exception.NotFoundException;
@@ -22,6 +23,7 @@ import ru.practicum.main.model.Event;
 import ru.practicum.main.model.User;
 import ru.practicum.main.repository.CategoryRepository;
 import ru.practicum.main.repository.EventRepository;
+import ru.practicum.main.repository.ParticipationRequestRepository;
 import ru.practicum.main.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -40,6 +42,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final ParticipationRequestRepository participationRequestRepository;
 
     @Override
     public List<EventShortDto> getEvents(Long userId, Integer from, Integer size) {
@@ -184,7 +187,12 @@ public class EventServiceImpl implements EventService {
                 users, states, categories, start, end, pageable);
 
         return events.stream()
-                .map(event -> EventMapper.toFullDto(event, new EventStatistics(0, 0)))
+                .map(event -> {
+                    long confirmedRequests = participationRequestRepository
+                            .countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);
+                    long views = 0L;
+                    return EventMapper.toFullDto(event, new EventStatistics(confirmedRequests, views));
+                })
                 .collect(Collectors.toList());
     }
 
