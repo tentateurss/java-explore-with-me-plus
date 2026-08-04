@@ -10,15 +10,13 @@ import java.util.List;
 @Repository
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
 
-    // Исправлено: requestorId вместо requesterId
-    List<ParticipationRequest> findAllByRequestorId(Long userId);
+    List<ParticipationRequest> findAllByRequesterId(Long userId);
 
-    // Исправлено: requestorId вместо requesterId
-    boolean existsByRequestorIdAndEventId(Long userId, Long eventId);
+    boolean existsByRequesterIdAndEventId(Long userId, Long eventId);
 
     long countByEventIdAndStatus(Long eventId, RequestStatus status);
 
-    ParticipationRequest findByIdAndRequestorId(Long requestId, Long userId);
+    ParticipationRequest findByIdAndRequesterId(Long requestId, Long userId);
 
     List<ParticipationRequest> findAllByEventId(Long eventId);
 }
