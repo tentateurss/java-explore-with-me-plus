@@ -21,7 +21,7 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String annotation;
 
     @ManyToOne
@@ -31,7 +31,7 @@ public class Event {
     @Column(nullable = false)
     private LocalDateTime createdOn;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
     @Column(nullable = false)
