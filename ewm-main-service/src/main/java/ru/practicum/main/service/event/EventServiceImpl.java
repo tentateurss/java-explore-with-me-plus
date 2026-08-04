@@ -139,7 +139,7 @@ public class EventServiceImpl implements EventService {
 
         if (request.getEventDate() != null &&
                 request.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
-            throw new ConflictException("Event date must be at least 1 hour from now");
+            throw new BadRequestException("Event date must be at least 1 hour from now");
         }
 
         EventMapper.updateEntity(event, request, category);
