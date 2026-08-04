@@ -14,7 +14,6 @@ import ru.practicum.main.dto.event.EventShortDto;
 import ru.practicum.main.dto.event.EventStatistics;
 import ru.practicum.main.enums.EventState;
 import ru.practicum.main.enums.RequestStatus;
-import ru.practicum.main.exception.BadRequestException;
 import ru.practicum.main.exception.NotFoundException;
 import ru.practicum.main.mapper.EventMapper;
 import ru.practicum.main.model.Event;
