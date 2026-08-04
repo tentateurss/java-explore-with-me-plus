@@ -46,6 +46,8 @@ public class PublicEventServiceImpl implements PublicEventService {
                         "rangeEnd={}, onlyAvailable={}, sort={}, from={}, size={}",
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
 
+        saveHit(request);
+
         if (rangeStart == null && rangeEnd == null) {
             rangeStart = LocalDateTime.now();
         }
@@ -71,8 +73,6 @@ public class PublicEventServiceImpl implements PublicEventService {
             result.sort((e1, e2) -> Long.compare(e2.getViews(), e1.getViews()));
         }
 
-        saveHit(request);
-
         return result;
     }
 
@@ -83,10 +83,10 @@ public class PublicEventServiceImpl implements PublicEventService {
         Event event = eventRepository.findByIdAndState(id, EventState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException(String.format("Опубликованное событие с id=%d не найдено", id)));
 
+        saveHit(request);
+
         Map<Long, EventStatistics> statsMap = getEventStatistics(List.of(event));
         EventStatistics stats = statsMap.getOrDefault(id, new EventStatistics(0, 0));
-
-        saveHit(request);
 
         return EventMapper.toFullDto(event, stats);
     }
@@ -151,6 +151,8 @@ public class PublicEventServiceImpl implements PublicEventService {
                     .map(event -> "/events/" + event.getId())
                     .collect(Collectors.toList());
 
+            log.info("=== GETTING STATS FOR URIS: {}", uris);
+
             LocalDateTime start = LocalDateTime.of(2020, 1, 1, 0, 0, 0);
             LocalDateTime end = LocalDateTime.now().plusDays(1);
 
@@ -158,11 +160,18 @@ public class PublicEventServiceImpl implements PublicEventService {
                     start.format(STANDARD),
                     end.format(STANDARD),
                     uris.toArray(new String[0]),
-                    false
+                    true
             ).getBody();
 
-            if (viewStats == null) {
-                return Map.of();
+            log.info("=== VIEW STATS RESPONSE: {}", viewStats);
+
+            if (viewStats == null || viewStats.isEmpty()) {
+                log.warn("=== STATS RESPONSE IS EMPTY, returning default values");
+                return events.stream()
+                        .collect(Collectors.toMap(
+                                Event::getId,
+                                event -> new EventStatistics(0L, 0L)
+                        ));
             }
 
             Map<Long, Long> viewsMap = viewStats.stream()
@@ -170,6 +179,8 @@ public class PublicEventServiceImpl implements PublicEventService {
                             stat -> extractEventIdFromUri(stat.getUri()),
                             ViewStats::getHits
                     ));
+
+            log.info("=== VIEWS MAP: {}", viewsMap);
 
             return events.stream()
                     .collect(Collectors.toMap(
@@ -196,7 +207,7 @@ public class PublicEventServiceImpl implements PublicEventService {
         try {
             String uri = request.getRequestURI();
             String ip = request.getRemoteAddr();
-            log.debug("Saving hit: uri={}, ip={}", uri, ip);
+            log.info("=== SAVING HIT: uri={}, ip={}", uri, ip);
 
             statsClient.saveHit(
                     "ewm-main-service",
@@ -204,9 +215,9 @@ public class PublicEventServiceImpl implements PublicEventService {
                     ip,
                     LocalDateTime.now()
             );
-            log.debug("Hit saved successfully");
+            log.info("=== HIT SAVED SUCCESSFULLY");
         } catch (Exception e) {
-            log.error("Failed to save hit for uri={}: {}", request.getRequestURI(), e.getMessage());
+            log.error("=== FAILED TO SAVE HIT: {}", e.getMessage(), e);
         }
     }
 }

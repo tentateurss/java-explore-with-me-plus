@@ -12,7 +12,7 @@ public class StatsClientConfig {
 
     @Bean
     public StatsClient statsClient(
-            @Value("${stats-server.url:http://localhost:9090}") String baseUrl,
+            @Value("${stats-server.url:http://stats-server:9090}") String baseUrl,
             RestClient.Builder restClientBuilder,
             ObjectMapper objectMapper) {
         return new StatsClient(baseUrl, restClientBuilder, objectMapper);
