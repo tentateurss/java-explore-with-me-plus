@@ -37,30 +37,54 @@ public class PublicEventServiceImpl implements PublicEventService {
 
     @Override
     public List<EventShortDto> getAllEvents(String text, List<Long> categories, Boolean paid,
-                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable,
-                                            String sort, Integer from, Integer size, HttpServletRequest request) {
+                                            LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                            Boolean onlyAvailable, String sort,
+                                            Integer from, Integer size,
+                                            HttpServletRequest request) {
 
-        log.info("PublicEventService: получение событий с параметрами text={}, categories={}, paid={}, rangeStart={}, " +
-                        "rangeEnd={}, onlyAvailable={}, sort={}, from={}, size={}",
+        log.info("PublicEventService: получение событий с параметрами text={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, onlyAvailable={}, sort={}, from={}, size={}",
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
 
+
         saveHit(request);
+
+        if (from == null) {
+            from = 0;
+        }
+
+        if (size == null) {
+            size = 10;
+        }
 
         if (rangeStart == null && rangeEnd == null) {
             rangeStart = LocalDateTime.now();
         }
 
-        PageRequest pageRequest;
-        if ("EVENT_DATE".equals(sort)) {
-            pageRequest = PageRequest.of(from / size, size, Sort.by("eventDate").ascending());
-        } else {
-            pageRequest = PageRequest.of(from / size, size);
+
+        if (categories != null && categories.isEmpty()) {
+            categories = null;
         }
 
-        List<Event> events = eventRepository.findEventsWithFilters(
-                null,
-                List.of(EventState.PUBLISHED),
-                categories,
+
+        PageRequest pageRequest;
+
+        if ("EVENT_DATE".equals(sort)) {
+            pageRequest = PageRequest.of(
+                    from / size,
+                    size,
+                    Sort.by("eventDate").ascending()
+            );
+        } else {
+            pageRequest = PageRequest.of(
+                    from / size,
+                    size
+            );
+        }
+
+
+        List<Event> events = eventRepository.findPublishedEvents(
+                categories == null ? List.of(-1L) : categories,
+                categories == null,
                 rangeStart,
                 rangeEnd,
                 pageRequest

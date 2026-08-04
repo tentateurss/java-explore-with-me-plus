@@ -2,6 +2,7 @@ package ru.practicum.main.service.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import ru.practicum.stats.dto.ViewStats;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -181,20 +183,33 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> getEventsWithParameters(List<Long> users, List<String> states,
-                                                      List<Long> categories, String rangeStart,
-                                                      String rangeEnd, Integer from, Integer size) {
-        log.debug("Getting events with parameters: users={}, states={}, categories={}", users, states, categories);
+    public List<EventFullDto> getEventsWithParameters(List<Long> users,
+                                                      List<String> states,
+                                                      List<Long> categories,
+                                                      String rangeStart,
+                                                      String rangeEnd,
+                                                      Integer from,
+                                                      Integer size) {
 
-        if (from == null) from = 0;
-        if (size == null) size = 10;
+        log.debug("Getting events with parameters: users={}, states={}, categories={}",
+                users, states, categories);
+
+        if (from == null) {
+            from = 0;
+        }
+
+        if (size == null) {
+            size = 10;
+        }
+
+        if (users != null && users.isEmpty()) {
+            users = null;
+        }
 
         if (states != null && states.isEmpty()) {
             states = null;
         }
-        if (users != null && users.isEmpty()) {
-            users = null;
-        }
+
         if (categories != null && categories.isEmpty()) {
             categories = null;
         }
@@ -207,12 +222,14 @@ public class EventServiceImpl implements EventService {
         if (rangeStart != null && !rangeStart.isBlank()) {
             start = LocalDateTime.parse(rangeStart, FORMATTER);
         }
+
         if (rangeEnd != null && !rangeEnd.isBlank()) {
             end = LocalDateTime.parse(rangeEnd, FORMATTER);
         }
 
         List<EventState> stateEnums = null;
-        if (states != null && !states.isEmpty()) {
+
+        if (states != null) {
             stateEnums = states.stream()
                     .map(state -> {
                         try {
@@ -225,12 +242,27 @@ public class EventServiceImpl implements EventService {
         }
 
         List<Event> events = eventRepository.findEventsWithFilters(
-                users, stateEnums, categories, start, end, pageable);
+                users,
+                users == null || users.isEmpty(),
+                stateEnums,
+                stateEnums == null || stateEnums.isEmpty(),
+                categories,
+                categories == null || categories.isEmpty(),
+                start,
+                end,
+                pageable
+        ).getContent();
 
         Map<Long, EventStatistics> statsMap = getEventStatistics(events);
 
         return events.stream()
-                .map(event -> EventMapper.toFullDto(event, statsMap.getOrDefault(event.getId(), new EventStatistics(0, 0))))
+                .map(event -> EventMapper.toFullDto(
+                        event,
+                        statsMap.getOrDefault(
+                                event.getId(),
+                                new EventStatistics(0, 0)
+                        )
+                ))
                 .collect(Collectors.toList());
     }
 
