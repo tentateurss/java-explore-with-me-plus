@@ -124,22 +124,31 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             throw new ValidationException("Этот пользователь не инициатор");
         }
 
+        long confirmedCount = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+        int limit = event.getParticipantLimit();
+
+        if (dto.getStatus() == RequestStatus.CONFIRMED) {
+            if (limit != 0 && confirmedCount >= limit) {
+                throw new ConflictException("Достигнут лимит заявок на участие");
+            }
+        }
+
         List<ParticipationRequest> requests = requestRepository.findAllById(dto.getRequestIds());
 
         if (requests.size() != dto.getRequestIds().size()) {
             throw new NotFoundException("Одна или несколько заявок не найдены");
         }
 
-        List<ParticipationRequest> confirmed = new ArrayList<>();
-        List<ParticipationRequest> rejected = new ArrayList<>();
-        long confirmedCount = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
-        int limit = event.getParticipantLimit();
-
         for (ParticipationRequest request : requests) {
             if (request.getStatus() != RequestStatus.PENDING) {
                 throw new ConflictException("Статус заявки должен быть PENDING");
             }
+        }
 
+        List<ParticipationRequest> confirmed = new ArrayList<>();
+        List<ParticipationRequest> rejected = new ArrayList<>();
+
+        for (ParticipationRequest request : requests) {
             if (dto.getStatus() == RequestStatus.CONFIRMED) {
                 if (limit == 0 || confirmedCount < limit) {
                     request.setStatus(RequestStatus.CONFIRMED);
