@@ -18,8 +18,8 @@ public class EventSearchParams {
     private LocalDateTime rangeStart;
     private LocalDateTime rangeEnd;
     private Boolean onlyAvailable;
-    String sort;
-    Integer from;
-    Integer size;
-    HttpServletRequest request;
+    private String sort;
+    private Integer from;
+    private Integer size;
+    private HttpServletRequest request;
 }
