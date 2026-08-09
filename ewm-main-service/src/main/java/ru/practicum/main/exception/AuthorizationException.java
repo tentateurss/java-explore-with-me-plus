@@ -1,0 +1,7 @@
+package ru.practicum.main.exception;
+
+public class AuthorizationException extends RuntimeException {
+    public AuthorizationException(String message) {
+        super(message);
+    }
+}

@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.main.dto.event.EventFullDto;
+import ru.practicum.main.dto.event.EventSearchParams;
 import ru.practicum.main.dto.event.EventShortDto;
 import ru.practicum.main.dto.event.EventStatistics;
 import ru.practicum.main.enums.EventState;
@@ -36,62 +37,55 @@ public class PublicEventServiceImpl implements PublicEventService {
     private final StatsClient statsClient;
 
     @Override
-    public List<EventShortDto> getAllEvents(String text, List<Long> categories, Boolean paid,
-                                            LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                            Boolean onlyAvailable, String sort,
-                                            Integer from, Integer size,
-                                            HttpServletRequest request) {
+    public List<EventShortDto> getAllEvents(EventSearchParams params) {
 
-        log.info("PublicEventService: получение событий с параметрами text={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, onlyAvailable={}, sort={}, from={}, size={}",
-                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+        log.info("PublicEventService: получение событий с параметрами {}.", params);
 
 
-        saveHit(request);
+        saveHit(params.getRequest());
 
-        if (from == null) {
-            from = 0;
+        if (params.getFrom() == null) {
+            params.setFrom(0);
         }
 
-        if (size == null) {
-            size = 10;
+        if (params.getSize() == null) {
+            params.setSize(10);
         }
 
-        if (rangeStart == null && rangeEnd == null) {
-            rangeStart = LocalDateTime.now();
+        if (params.getRangeStart() == null && params.getRangeEnd() == null) {
+            params.setRangeStart(LocalDateTime.now());
         }
 
 
-        if (categories != null && categories.isEmpty()) {
-            categories = null;
+        if (params.getCategories() != null && params.getCategories().isEmpty()) {
+            params.setCategories(null);
         }
-
 
         PageRequest pageRequest;
 
-        if ("EVENT_DATE".equals(sort)) {
+        if ("EVENT_DATE".equals(params.getSort())) {
             pageRequest = PageRequest.of(
-                    from / size,
-                    size,
+                    params.getFrom() / params.getSize(),
+                    params.getSize(),
                     Sort.by("eventDate").ascending()
             );
         } else {
             pageRequest = PageRequest.of(
-                    from / size,
-                    size
+                    params.getFrom() / params.getSize(),
+                    params.getSize()
             );
         }
 
-
         List<Event> events = eventRepository.findPublishedEvents(
-                categories == null ? List.of(-1L) : categories,
-                categories == null,
-                rangeStart,
-                rangeEnd,
+                params.getCategories() == null ? List.of(-1L) : params.getCategories(),
+                params.getCategories() == null,
+                params.getRangeStart(),
+                params.getRangeEnd(),
                 pageRequest
         );
 
-        if (text != null && !text.isBlank()) {
-            String searchText = text.toLowerCase();
+        if (params.getText() != null && !params.getText().isBlank()) {
+            String searchText = params.getText().toLowerCase();
             events = events.stream()
                     .filter(event ->
                             event.getAnnotation().toLowerCase().contains(searchText) ||
@@ -100,13 +94,13 @@ public class PublicEventServiceImpl implements PublicEventService {
                     .collect(Collectors.toList());
         }
 
-        if (paid != null) {
+        if (params.getPaid() != null) {
             events = events.stream()
-                    .filter(event -> event.getPaid().equals(paid))
+                    .filter(event -> event.getPaid().equals(params.getPaid()))
                     .collect(Collectors.toList());
         }
 
-        if (onlyAvailable != null && onlyAvailable) {
+        if (params.getOnlyAvailable() != null && params.getOnlyAvailable()) {
             events = events.stream()
                     .filter(event -> {
                         if (event.getParticipantLimit() == 0) return true;
@@ -120,10 +114,11 @@ public class PublicEventServiceImpl implements PublicEventService {
         Map<Long, EventStatistics> statsMap = getEventStatistics(events);
 
         List<EventShortDto> result = events.stream()
-                .map(event -> EventMapper.toShortDto(event, statsMap.getOrDefault(event.getId(), new EventStatistics(0, 0))))
+                .map(event -> EventMapper.toShortDto(event, statsMap.getOrDefault(event.getId(),
+                        new EventStatistics(0, 0))))
                 .collect(Collectors.toList());
 
-        if ("VIEWS".equals(sort)) {
+        if ("VIEWS".equals(params.getSort())) {
             result.sort((e1, e2) -> Long.compare(e2.getViews(), e1.getViews()));
         }
 
