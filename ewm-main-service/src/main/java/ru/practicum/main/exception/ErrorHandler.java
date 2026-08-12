@@ -45,9 +45,9 @@ public class ErrorHandler {
         return new ApiError(HttpStatus.BAD_REQUEST, "Invalid request data", message);
     }
 
-    @ExceptionHandler(AuthorizationException.class)
+    @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ApiError handleAuthFailure(AuthorizationException e) {
+    public ApiError handleAuthFailure(ForbiddenException e) {
         log.warn("Authorization failed: {}.", e.getMessage());
         return new ApiError(HttpStatus.UNAUTHORIZED, "Authorization failure", e.getMessage());
     }

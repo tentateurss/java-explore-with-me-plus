@@ -1,10 +1,10 @@
 package ru.practicum.main.service.subscription;
 
-import ru.practicum.main.dto.event.EventFullDto;
+import ru.practicum.main.dto.event.EventSearchParams;
+import ru.practicum.main.dto.event.EventShortDto;
 import ru.practicum.main.dto.subscription.SubscriberDto;
 import ru.practicum.main.dto.subscription.SubscriptionDto;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface SubscriptionService {
@@ -17,6 +17,6 @@ public interface SubscriptionService {
 
     List<SubscriberDto> getSubscribers(Long userId);
 
-    List<EventFullDto> getEventsFromSubscriptions(Long userId, LocalDateTime start, LocalDateTime end, int from, int size);
+    List<EventShortDto> getEventsFromSubscriptions(Long userId, EventSearchParams params);
 
 }

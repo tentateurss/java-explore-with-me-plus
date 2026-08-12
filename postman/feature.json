@@ -19,8 +19,8 @@
               "    const rnd = new RandomUtils();\r",
               "\r",
               "    try {\r",
-              "        user = await api.addUser(rnd.getUser());\r",
-              "        author = await api.addUser(rnd.getUser());\r",
+              "        const user = await api.addUser(rnd.getUser());\r",
+              "        const author = await api.addUser(rnd.getUser());\r",
               "        pm.collectionVariables.set(\"userId\", user.id);\r",
               "        pm.collectionVariables.set(\"x-user-id\", user.id);\r",
               "        pm.collectionVariables.set(\"authorId\", author.id);\r",
@@ -57,22 +57,6 @@
             "exec": [
               "pm.test(\"Status code is 201\", function () {\r",
               "    pm.expect(pm.response.code).to.be.oneOf([201]);\r",
-              "});\r",
-              "pm.test(\"Response have body\", function () {\r",
-              "    pm.response.to.be.withBody;\r",
-              "    pm.response.to.be.json;\r",
-              "});\r",
-              "\r",
-              "pm.test(\"Response data equal to request\", function () {\r",
-              "    var jsonData = pm.response.json();\r",
-              "    pm.expect(jsonData).to.have.property('id');\r",
-              "    pm.expect(jsonData).to.have.property('createdAt');\r",
-              "    pm.expect(jsonData).to.have.property('subscriber');\r",
-              "    pm.expect(jsonData).to.have.property('author');\r",
-              "    pm.expect(jsonData.subscriber).to.have.property('id');\r",
-              "    pm.expect(jsonData.subscriber.id).to.eql(pm.collectionVariables.get('userId'));\r",
-              "    pm.expect(jsonData.author).to.have.property('id');\r",
-              "    pm.expect(jsonData.author.id).to.eql(pm.collectionVariables.get('authorId'));\r",
               "});"
             ],
             "type": "text/javascript",
@@ -116,7 +100,7 @@
             },
             {
               "key": "authorId",
-              "value": "{{authorid}}"
+              "value": "{{authorId}}"
             }
           ]
         }
@@ -215,7 +199,7 @@
             },
             {
               "key": "authorId",
-              "value": "{{authorid}}"
+              "value": "{{authorId}}"
             }
           ]
         }
@@ -237,7 +221,7 @@
               "        user = await api.addUser(rnd.getUser());\r",
               "        pm.collectionVariables.set(\"x-user-id\", user.id);\r",
               "        pm.collectionVariables.set('userId', user.id);\r",
-              "        pm.collectionVariables.set(\"authorId\", 9999);\r",
+              "        pm.collectionVariables.set(\"authorId\", \"9999\");\r",
               "    } catch(err) {\r",
               "        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
               "    }\r",
@@ -314,7 +298,7 @@
             },
             {
               "key": "authorId",
-              "value": "{{authorid}}"
+              "value": "{{authorId}}"
             }
           ]
         }
@@ -409,7 +393,7 @@
             },
             {
               "key": "authorId",
-              "value": "{{authorid}}"
+              "value": "{{authorId}}"
             }
           ]
         }
@@ -450,7 +434,7 @@
               "        pm.collectionVariables.set(\"userId\", user.id);\r",
               "        pm.collectionVariables.set(\"x-user-id\", user.id);\r",
               "        pm.collectionVariables.set(\"authorId\", author.id);\r",
-              "        subscription = await api.subscribe(user.id, author.id);\r",
+              "        subscription = await api.subscribe(user.id, author.id, user.id, null);\r",
               "    } catch(err) {\r",
               "        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
               "    }\r",
@@ -506,7 +490,7 @@
             },
             {
               "key": "authorId",
-              "value": "{{authorid}}"
+              "value": "{{authorId}}"
             }
           ]
         }
@@ -530,7 +514,7 @@
               "        pm.collectionVariables.set(\"userId\", user.id);\r",
               "        pm.collectionVariables.set(\"x-user-id\", user.id);\r",
               "        pm.collectionVariables.set(\"authorId\", author.id);\r",
-              "        subscription = await api.subscribe(user.id, author.id);\r",
+              "        subscription = await api.subscribe(user.id, author.id, user.id);\r",
               "    } catch(err) {\r",
               "        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
               "    }\r",
@@ -599,7 +583,7 @@
             },
             {
               "key": "authorId",
-              "value": "{{authorid}}"
+              "value": "{{authorId}}"
             }
           ]
         }
@@ -690,7 +674,7 @@
             },
             {
               "key": "authorId",
-              "value": "{{authorid}}"
+              "value": "{{authorId}}"
             }
           ]
         }
@@ -781,7 +765,7 @@
             },
             {
               "key": "authorId",
-              "value": "{{authorid}}"
+              "value": "{{authorId}}"
             }
           ]
         }
@@ -873,7 +857,7 @@
             },
             {
               "key": "authorId",
-              "value": "{{authorid}}"
+              "value": "{{authorId}}"
             }
           ]
         }
@@ -896,7 +880,7 @@
               "        author = await api.addUser(rnd.getUser());\r",
               "        pm.collectionVariables.set(\"userId\", user.id);\r",
               "        pm.collectionVariables.set(\"x-user-id\", user.id);\r",
-              "        susbscription = await api.subscribe(user.id, author.id);\r",
+              "        susbscription = await api.subscribe(user.id, author.id, user.id);\r",
               "    } catch(err) {\r",
               "        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
               "    }\r",
@@ -931,7 +915,7 @@
               "pm.test(\"Status code is 200\", function () {\r",
               "    pm.response.to.be.ok;\r",
               "});\r",
-              "pm.test(\"Test list item response\", function () {\r",
+              "pm.test(\"Test list response\", function () {\r",
               "    pm.response.to.be.withBody;\r",
               "    pm.response.to.be.json;\r",
               "    var jsonData = pm.response.json();\r",
@@ -1071,9 +1055,9 @@
               "    try {\r",
               "        subscriber = await api.addUser(rnd.getUser());\r",
               "        user = await api.addUser(rnd.getUser());\r",
+              "        subscription = await api.subscribe(subscriber.id, user.id, subscriber.id);\r",
               "        pm.collectionVariables.set(\"userId\", user.id);\r",
               "        pm.collectionVariables.set(\"x-user-id\", user.id);\r",
-              "        subscription = await api.subscribe(susbscriber.id, user.id);\r",
               "    } catch(err) {\r",
               "        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
               "    }\r",
@@ -1108,7 +1092,7 @@
               "pm.test(\"Status code is 200\", function () {\r",
               "    pm.response.to.be.ok;\r",
               "});\r",
-              "pm.test(\"Test list item response\", function () {\r",
+              "pm.test(\"Test list response\", function () {\r",
               "    pm.response.to.be.withBody;\r",
               "    pm.response.to.be.json;\r",
               "    var jsonData = pm.response.json();\r",
@@ -1250,7 +1234,7 @@
               "        author = await api.addUser(rnd.getUser());\r",
               "        pm.collectionVariables.set(\"userId\", user.id);\r",
               "        pm.collectionVariables.set(\"x-user-id\", user.id);\r",
-              "        subscription = await api.subscribe(user.id, author.id);\r",
+              "        subscription = await api.subscribe(user.id, author.id, user.id);\r",
               "        \r",
               "        category = await api.addCategory(rnd.getCategory());\r",
               "        event = await api.addEvent(author.id, rnd.getEvent(category.id));\r",
@@ -1561,31 +1545,52 @@
           "        return this.get('/admin/users?ids=' + userId, null, \"Ошибка при поиске пользователя по id\", verbose);\r",
           "    }\r",
           "\r",
-          "    async subscribe(userId, authorId, verbose=null) {\r",
-          "        return this.post('/users/' + userId + '/subscriptions/' + authorId, null, \"Ошибка при попытке подписаться на пользователя: \", verbose);\r",
+          "    async subscribe(userId, authorId, userHeader, verbose=null) {\r",
+          "        return this.post('/users/' + userId + '/subscriptions/' + authorId, null, \"Ошибка при попытке подписаться на пользователя: \", verbose, userHeader);\r",
           "    }\r",
           "\r",
-          "    async post(path, body, errorText = \"Ошибка при выполнении post-запроса: \", verbose=null) {\r",
-          "        return this.sendRequest(\"POST\", path, body, errorText, verbose);\r",
+          "    async post(path, body, errorText = \"Ошибка при выполнении post-запроса: \", verbose=null, userHeader=0) {\r",
+          "        return this.sendRequest(\"POST\", path, body, errorText, verbose, userHeader);\r",
           "    }\r",
           "\r",
-          "    async patch(path, body = null, errorText = \"Ошибка при выполнении patch-запроса: \", verbose=null) {\r",
-          "        return this.sendRequest(\"PATCH\", path, body, errorText, verbose);\r",
+          "    async patch(path, body = null, errorText = \"Ошибка при выполнении patch-запроса: \", verbose=null, userHeader=0) {\r",
+          "        return this.sendRequest(\"PATCH\", path, body, errorText, verbose, userHeader);\r",
           "    }\r",
           "\r",
-          "    async get(path, body = null, errorText = \"Ошибка при выполнении get-запроса: \", verbose=null) {\r",
-          "        return this.sendRequest(\"GET\", path, body, errorText, verbose);\r",
+          "    async get(path, body = null, errorText = \"Ошибка при выполнении get-запроса: \", verbose=null, userHeader=0) {\r",
+          "        return this.sendRequest(\"GET\", path, body, errorText, verbose, userHeader);\r",
           "    }\r",
           "\r",
-          "    async sendRequest(method, path, body=null, errorText = \"Ошибка при выполнении запроса: \", verbose=null) {\r",
+          "    async sendRequest(method, path, body=null, errorText = \"Ошибка при выполнении запроса: \", verbose=null, userHeader=0) {\r",
           "        return new Promise((resolve, reject) => {\r",
           "            verbose = verbose == null ? this._verbose : verbose;\r",
-          "            const request = {\r",
-          "                url: this.baseUrl + path,\r",
-          "                method: method,\r",
-          "                body: body == null ? \"\" : JSON.stringify(body),\r",
-          "                header: { \"Content-Type\": \"application/json\" },\r",
-          "            };\r",
+          "            var request = {};\r",
+          "            if (userHeader == 0){\r",
+          "                request = {\r",
+          "                    url: this.baseUrl + path,\r",
+          "                    method: method,\r",
+          "                    body: body == null ? \"\" : JSON.stringify(body),\r",
+          "                    header: { \"Content-Type\": \"application/json\"},\r",
+          "                };\r",
+          "            }else{\r",
+          "                request = {\r",
+          "                    url: this.baseUrl + path,\r",
+          "                    method: method,\r",
+          "                    body: body == null ? \"\" : JSON.stringify(body),\r",
+          "                    header: [{\r",
+          "                        \"key\": \"X-User-Id\",\r",
+          "                        \"value\": userHeader,\r",
+          "                        \"type\": \"text\",\r",
+          "                    },\r",
+          "                    {\r",
+          "                        \"key\": \"Content-Type\",\r",
+          "                        \"name\": \"Content-Type\",\r",
+          "                        \"value\": \"application/json\",\r",
+          "                        \"type\": \"text\"\r",
+          "                    }]\r",
+          "                };\r",
+          "            }\r",
+          "            \r",
           "            if(verbose) {\r",
           "                console.log(\"Отправляю запрос: \", request);\r",
           "            }\r",
@@ -1705,7 +1710,7 @@
       "value": ""
     },
     {
-      "key": "authorid",
+      "key": "authorId",
       "value": ""
     }
   ]

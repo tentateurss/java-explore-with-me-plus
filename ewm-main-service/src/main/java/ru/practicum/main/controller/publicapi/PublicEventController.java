@@ -9,9 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.dto.event.EventFullDto;
 import ru.practicum.main.dto.event.EventSearchParams;
 import ru.practicum.main.dto.event.EventShortDto;
-import ru.practicum.main.exception.AuthorizationException;
 import ru.practicum.main.exception.BadRequestException;
+import ru.practicum.main.exception.ForbiddenException;
 import ru.practicum.main.service.event.PublicEventService;
+import ru.practicum.main.service.subscription.SubscriptionService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -74,7 +75,7 @@ public class PublicEventController {
 
     private List<EventShortDto> getEventsBySubscription(EventSearchParams params, Long userId) {
         if (userId == null) {
-            throw new AuthorizationException("Для получения событий по подпискам требуется предоставить id пользователя");
+            throw new ForbiddenException("Для получения событий по подпискам требуется предоставить id пользователя");
         }
         return subscriptionService.getEventsFromSubscriptions(userId, params);
     }
