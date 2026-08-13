@@ -101,7 +101,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         return subscriptions.stream()
                 .map(subscription -> SubscriptionMapper.toSubscriberDto(subscription,
-                        subscribers.get(subscription.getSubscriberId()))) //Перепроверить название метода
+                        subscribers.get(subscription.getSubscriberId())))
                 .collect(Collectors.toList());
     }
 
