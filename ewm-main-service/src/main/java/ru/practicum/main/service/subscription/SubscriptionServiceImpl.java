@@ -20,6 +20,7 @@ import ru.practicum.main.service.event.EventService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -72,40 +73,34 @@ public class SubscriptionServiceImpl implements SubscriptionService{
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<SubscriptionDto> getSubscriptions(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь " + userId + " не найден.");
         }
         List<Subscription> subscriptions = subscriptionRepository.findBySubscriberId(userId);
+        Map<Long, UserShortDto> authors = getUserDtos(subscriptions.stream()
+                .map(subscription -> subscription.getAuthorId())
+                .toList());
 
         return subscriptions.stream()
-                .map(sub -> {
-                    User author = userRepository.findById(sub.getAuthorId())
-                            .orElseThrow(() -> new NotFoundException("Автор с id " + sub.getAuthorId() + " не найден."));
-
-                    UserShortDto authorDto = UserMapper.toShortDto(author);
-                    return SubscriptionMapper.toSubscriptionDto(sub, authorDto);
-                })
+                .map(subscription -> SubscriptionMapper.toSubscriptionDto(subscription,
+                        authors.get(subscription.getAuthorId())))
                 .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<SubscriberDto> getSubscribers(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь " + userId + " не найден.");
         }
-        List<Subscription> subscribers = subscriptionRepository.findByAuthorId(userId);
+        List<Subscription> subscriptions = subscriptionRepository.findByAuthorId(userId);
+        Map<Long, UserShortDto> subscribers = getUserDtos(subscriptions.stream()
+                .map(subscription -> subscription.getSubscriberId())
+                .toList());
 
-        return subscribers.stream()
-                .map(sub -> {
-                    User subscriber = userRepository.findById(sub.getSubscriberId())
-                            .orElseThrow(() -> new NotFoundException("Подписчик с id " + sub.getSubscriberId() + " не найден."));
-
-                    UserShortDto subscriberDto = UserMapper.toShortDto(subscriber);
-                    return SubscriptionMapper.toSubscriberDto(sub, subscriberDto);
-                })
+        return subscriptions.stream()
+                .map(subscription -> SubscriptionMapper.toSubscriberDto(subscription,
+                        subscribers.get(subscription.getSubscriberId()))) //Перепроверить название метода
                 .collect(Collectors.toList());
     }
 
@@ -136,5 +131,11 @@ public class SubscriptionServiceImpl implements SubscriptionService{
                 from,
                 size
         );
+    }
+
+    private Map<Long, UserShortDto> getUserDtos(List<Long> ids) {
+        return userRepository.findAllById(ids)
+                .stream()
+                .collect(Collectors.toMap(author -> author.getId(), author -> UserMapper.toShortDto(author)));
     }
 }
