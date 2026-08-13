@@ -174,10 +174,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscriptions/:authorId",
+          "raw": "http://localhost:8080/users/:userId/subscriptions/:authorId",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -273,10 +275,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscriptions/:authorId",
+          "raw": "http://localhost:8080/users/:userId/subscriptions/:authorId",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -376,10 +380,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscriptions/:authorId",
+          "raw": "http://localhost:8080/users/:userId/subscriptions/:authorId",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -473,10 +479,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscriptions/:authorId",
+          "raw": "http://localhost:8080/users/:userId/subscriptions/:authorId",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -566,10 +574,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscriptions/:authorId",
+          "raw": "http://localhost:8080/users/:userId/subscriptions/:authorId",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -657,10 +667,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscriptions/:authorId",
+          "raw": "http://localhost:8080/users/:userId/subscriptions/:authorId",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -748,10 +760,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscriptions/:authorId",
+          "raw": "http://localhost:8080/users/:userId/subscriptions/:authorId",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -840,10 +854,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscriptions/:authorId",
+          "raw": "http://localhost:8080/users/:userId/subscriptions/:authorId",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -880,7 +896,7 @@
               "        author = await api.addUser(rnd.getUser());\r",
               "        pm.collectionVariables.set(\"userId\", user.id);\r",
               "        pm.collectionVariables.set(\"x-user-id\", user.id);\r",
-              "        susbscription = await api.subscribe(user.id, author.id, user.id);\r",
+              "        subscription = await api.subscribe(user.id, author.id, user.id);\r",
               "    } catch(err) {\r",
               "        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
               "    }\r",
@@ -938,10 +954,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscriptions",
+          "raw": "http://localhost:8080/users/:userId/subscriptions",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -1022,10 +1040,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscriptions",
+          "raw": "http://localhost:8080/users/:userId/subscriptions",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -1115,10 +1135,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscribers",
+          "raw": "http://localhost:8080/users/:userId/subscribers",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -1199,10 +1221,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscribers",
+          "raw": "http://localhost:8080/users/:userId/subscribers",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -1296,10 +1320,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscriptions/events",
+          "raw": "http://localhost:8080/users/:userId/subscriptions/events",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -1393,10 +1419,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscriptions/events",
+          "raw": "http://localhost:8080/users/:userId/subscriptions/events",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -1486,18 +1514,19 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/events?subscriptions=true",
+          "raw": "http://localhost:8080/events?subscriptions=true",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "events"
           ],
           "query": [
             {
               "key": "subscriptions",
-              "value": "true",
-              "type": "text"
+              "value": "true"
             }
           ]
         },
