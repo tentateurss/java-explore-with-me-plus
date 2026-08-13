@@ -7,10 +7,13 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main.dto.event.EventFullDto;
 import ru.practicum.main.dto.subscription.SubscriberDto;
 import ru.practicum.main.dto.subscription.SubscriptionDto;
+import ru.practicum.main.dto.user.UserShortDto;
 import ru.practicum.main.exception.ConflictException;
 import ru.practicum.main.exception.NotFoundException;
 import ru.practicum.main.mapper.SubscriptionMapper;
+import ru.practicum.main.mapper.UserMapper;
 import ru.practicum.main.model.Subscription;
+import ru.practicum.main.model.User;
 import ru.practicum.main.repository.SubscriptionRepository;
 import ru.practicum.main.repository.UserRepository;
 import ru.practicum.main.service.event.EventService;
@@ -45,10 +48,10 @@ public class SubscriptionServiceImpl implements SubscriptionService{
             throw new ConflictException("Вы уже подписаны на этого пользователя.");
         }
 
-        Subscription subscription = Subscription.builder() //Не знаю через билдер будем или через конструктор, люблю билдеры
-                .subscriberId(subscriberId)
-                .authorId(authorId)
-                .build();
+        Subscription subscription = new Subscription();
+        subscription.setSubscriberId(subscriberId);
+        subscription.setAuthorId(authorId);
+        subscription.setCreatedAt(LocalDateTime.now());
 
         subscriptionRepository.save(subscription);
     }
@@ -78,7 +81,13 @@ public class SubscriptionServiceImpl implements SubscriptionService{
         List<Subscription> subscriptions = subscriptionRepository.findBySubscriberId(userId);
 
         return subscriptions.stream()
-                .map(subscriptionMapper::toDto) //Перепроверить название метода
+                .map(sub -> {
+                    User author = userRepository.findById(sub.getAuthorId())
+                            .orElseThrow(() -> new NotFoundException("Автор с id " + sub.getAuthorId() + " не найден."));
+
+                    UserShortDto authorDto = UserMapper.toShortDto(author);
+                    return SubscriptionMapper.toSubscriptionDto(sub, authorDto);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -91,7 +100,13 @@ public class SubscriptionServiceImpl implements SubscriptionService{
         List<Subscription> subscribers = subscriptionRepository.findByAuthorId(userId);
 
         return subscribers.stream()
-                .map(subscriptionMapper::toDto) //Перепроверить название метода
+                .map(sub -> {
+                    User subscriber = userRepository.findById(sub.getSubscriberId())
+                            .orElseThrow(() -> new NotFoundException("Подписчик с id " + sub.getSubscriberId() + " не найден."));
+
+                    UserShortDto subscriberDto = UserMapper.toShortDto(subscriber);
+                    return SubscriptionMapper.toSubscriberDto(sub, subscriberDto);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -106,7 +121,7 @@ public class SubscriptionServiceImpl implements SubscriptionService{
         }
 
         List<Long> authorIds = subscriptions.stream()
-                .map(sub -> sub.getAuthorId()) //Не забыть свериться по названию поля
+                .map(sub -> sub.getAuthorId())
                 .collect(Collectors.toList());
 
         //В этот метод мы приняли LocalDateTime, а передать надо String
@@ -115,7 +130,7 @@ public class SubscriptionServiceImpl implements SubscriptionService{
 
         return eventService.getEventsWithParameters(
                 authorIds,
-                List.of("PUBLISHED"), //Полагаю, нет смысла искать другие типы?
+                List.of("PUBLISHED"),
                 null,
                 startStr,
                 endStr,
