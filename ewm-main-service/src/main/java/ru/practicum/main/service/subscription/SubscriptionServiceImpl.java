@@ -30,7 +30,6 @@ public class SubscriptionServiceImpl implements SubscriptionService{
     private final SubscriptionRepository subscriptionRepository;
     private final EventService eventService;
     private final UserRepository userRepository;
-    private final SubscriptionMapper subscriptionMapper;
 
     @Override
     @Transactional
