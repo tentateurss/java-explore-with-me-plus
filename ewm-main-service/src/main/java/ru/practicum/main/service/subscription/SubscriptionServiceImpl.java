@@ -49,11 +49,10 @@ public class SubscriptionServiceImpl implements SubscriptionService{
             throw new ConflictException("Вы уже подписаны на этого пользователя.");
         }
 
-        Subscription subscription = Subscription.builder()
-                .subscriberId(subscriberId)
-                .authorId(authorId)
-                .createdAt(LocalDateTime.now())
-                .build();
+        Subscription subscription = new Subscription();
+        subscription.setSubscriberId(subscriberId);
+        subscription.setAuthorId(authorId);
+        subscription.setCreatedAt(LocalDateTime.now());
 
         subscriptionRepository.save(subscription);
     }
@@ -86,7 +85,7 @@ public class SubscriptionServiceImpl implements SubscriptionService{
 
         return subscriptions.stream()
                 .map(subscription -> SubscriptionMapper.toSubscriptionDto(subscription,
-                                authors.get(subscription.getAuthorId())))
+                        authors.get(subscription.getAuthorId())))
                 .collect(Collectors.toList());
     }
 
@@ -97,7 +96,7 @@ public class SubscriptionServiceImpl implements SubscriptionService{
         }
         List<Subscription> subscriptions = subscriptionRepository.findByAuthorId(userId);
         Map<Long, UserShortDto> subscribers = getUserDtos(subscriptions.stream()
-                .map(subscription -> subscription.getAuthorId())
+                .map(subscription -> subscription.getSubscriberId())
                 .toList());
 
         return subscriptions.stream()
@@ -117,7 +116,7 @@ public class SubscriptionServiceImpl implements SubscriptionService{
         }
 
         List<Long> authorIds = subscriptions.stream()
-                .map(sub -> sub.getAuthorId()) //Не забыть свериться по названию поля
+                .map(sub -> sub.getAuthorId())
                 .collect(Collectors.toList());
 
         return eventService.getAllEvents(params)
