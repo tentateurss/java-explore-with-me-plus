@@ -5,7 +5,6 @@ import ru.practicum.main.dto.event.EventFullDto;
 import ru.practicum.main.dto.event.EventSearchParams;
 import ru.practicum.main.dto.event.EventShortDto;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PublicEventService {
