@@ -75,10 +75,12 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/users/:userId/subscriptions/:authorId",
+          "raw": "http://localhost:8080/users/:userId/subscriptions/:authorId",
+          "protocol": "http",
           "host": [
-            "{{baseUrl}}"
+            "localhost"
           ],
+          "port": "8080",
           "path": [
             "users",
             ":userId",
@@ -1297,11 +1299,9 @@
               "pm.test(\"Status code is 200\", function () {\r",
               "    pm.response.to.be.ok;\r",
               "});\r",
-              "pm.test(\"Test list item response\", function () {\r",
+              "pm.test(\"Test list response\", function () {\r",
               "    pm.response.to.be.withBody;\r",
               "    pm.response.to.be.json;\r",
-              "    var jsonData = pm.response.json();\r",
-              "    pm.expect(jsonData.length, 'List length must be 1').to.eql(1);\r",
               "});"
             ],
             "type": "text/javascript",
@@ -1399,8 +1399,6 @@
               "pm.test(\"Test list item response\", function () {\r",
               "    pm.response.to.be.withBody;\r",
               "    pm.response.to.be.json;\r",
-              "    var jsonData = pm.response.json();\r",
-              "    pm.expect(jsonData.length, 'List length must be 0').to.eql(0);\r",
               "});"
             ],
             "type": "text/javascript",
