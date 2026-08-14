@@ -17,6 +17,7 @@ import ru.practicum.main.service.subscription.SubscriptionService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static ru.practicum.main.constant.HeaderConstants.X_USER_ID;
 import static ru.practicum.stats.dto.util.DateTimeFormatters.PATTERN;
 
 @RestController
@@ -25,8 +26,6 @@ import static ru.practicum.stats.dto.util.DateTimeFormatters.PATTERN;
 @Slf4j
 @Validated
 public class PublicEventController {
-
-    private static final String X_USER_ID = "X-User-Id";
 
     private final PublicEventService publicEventService;
     private final SubscriptionService subscriptionService;

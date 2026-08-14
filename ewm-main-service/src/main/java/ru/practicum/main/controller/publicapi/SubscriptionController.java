@@ -16,6 +16,7 @@ import ru.practicum.main.service.subscription.SubscriptionService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static ru.practicum.main.constant.HeaderConstants.X_USER_ID;
 import static ru.practicum.stats.dto.util.DateTimeFormatters.PATTERN;
 
 @RestController
@@ -26,13 +27,12 @@ import static ru.practicum.stats.dto.util.DateTimeFormatters.PATTERN;
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
-    private static final String HEADER_USER_ID = "X-User-Id";
 
     @PostMapping("/subscriptions/{authorId}")
     @ResponseStatus(HttpStatus.CREATED)
     public void subscribe(@PathVariable(name = "userId") Long userId,
                           @PathVariable(name = "authorId") Long authorId,
-                          @RequestHeader(HEADER_USER_ID) Long requesterId) {
+                          @RequestHeader(X_USER_ID) Long requesterId) {
         if (!userId.equals(requesterId)) {
             throw new ForbiddenException(String.format("Пользователь с id = %d не умеет доступа к данным пользователя "
                     + "с id = %d", userId, requesterId));
@@ -45,7 +45,7 @@ public class SubscriptionController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void unsubscribe(@PathVariable(name = "userId") Long userId,
                             @PathVariable(name = "authorId") Long authorId,
-                            @RequestHeader(HEADER_USER_ID) Long requesterId) {
+                            @RequestHeader(X_USER_ID) Long requesterId) {
         if (!userId.equals(requesterId)) {
             throw new ForbiddenException(String.format("Пользователь с id = %d не умеет доступа к данным пользователя "
                     + "с id = %d", userId, requesterId));
@@ -56,7 +56,7 @@ public class SubscriptionController {
 
     @GetMapping("/subscriptions")
     public List<SubscriptionDto> getSubscriptions(@PathVariable(name = "userId") Long userId,
-                                                  @RequestHeader(HEADER_USER_ID) Long requesterId) {
+                                                  @RequestHeader(X_USER_ID) Long requesterId) {
         if (!userId.equals(requesterId)) {
             throw new ForbiddenException(String.format("Пользователь с id = %d не умеет доступа к данным пользователя "
                     + "с id = %d", userId, requesterId));
@@ -67,7 +67,7 @@ public class SubscriptionController {
 
     @GetMapping("/subscribers")
     public List<SubscriberDto> getSubscribers(@PathVariable(name = "userId") Long userId,
-                                              @RequestHeader(HEADER_USER_ID) Long requesterId) {
+                                              @RequestHeader(X_USER_ID) Long requesterId) {
         if (!userId.equals(requesterId)) {
             throw new ForbiddenException(String.format("Пользователь с id = %d не умеет доступа к данным пользователя "
                     + "с id = %d", userId, requesterId));
@@ -78,7 +78,7 @@ public class SubscriptionController {
 
     @GetMapping("/subscriptions/events")
     public List<EventShortDto> getEventsFromSubscriptions(@PathVariable(name = "userId") Long userId,
-                                                          @RequestHeader(HEADER_USER_ID) Long requesterId,
+                                                          @RequestHeader(X_USER_ID) Long requesterId,
                                                           @RequestParam(required = false)
                                                          @DateTimeFormat(pattern = PATTERN) LocalDateTime start,
                                                           @RequestParam(required = false)
