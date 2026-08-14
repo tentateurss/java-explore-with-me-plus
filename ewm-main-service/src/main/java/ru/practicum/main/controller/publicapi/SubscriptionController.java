@@ -1,11 +1,13 @@
-package ru.practicum.main.controller.subcription;
+package ru.practicum.main.controller.publicapi;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.main.dto.event.EventFullDto;
+import ru.practicum.main.dto.event.EventSearchParams;
+import ru.practicum.main.dto.event.EventShortDto;
 import ru.practicum.main.dto.subscription.SubscriberDto;
 import ru.practicum.main.dto.subscription.SubscriptionDto;
 import ru.practicum.main.exception.ForbiddenException;
@@ -24,9 +26,10 @@ import static ru.practicum.stats.dto.util.DateTimeFormatters.PATTERN;
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
-    private static final String HEADER_USER_ID = "X-Sharer-User-Id";
+    private static final String HEADER_USER_ID = "X-User-Id";
 
     @PostMapping("/subscriptions/{authorId}")
+    @ResponseStatus(HttpStatus.CREATED)
     public void subscribe(@PathVariable(name = "userId") Long userId,
                           @PathVariable(name = "authorId") Long authorId,
                           @RequestHeader(HEADER_USER_ID) Long requesterId) {
@@ -39,6 +42,7 @@ public class SubscriptionController {
     }
 
     @DeleteMapping("/subscriptions/{authorId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void unsubscribe(@PathVariable(name = "userId") Long userId,
                             @PathVariable(name = "authorId") Long authorId,
                             @RequestHeader(HEADER_USER_ID) Long requesterId) {
@@ -73,21 +77,28 @@ public class SubscriptionController {
     }
 
     @GetMapping("/subscriptions/events")
-    public List<EventFullDto> getEventsFromSubscriptions(@PathVariable(name = "userId") Long userId,
-                                                         @RequestHeader(HEADER_USER_ID) Long requesterId,
-                                                         @RequestParam(required = false)
+    public List<EventShortDto> getEventsFromSubscriptions(@PathVariable(name = "userId") Long userId,
+                                                          @RequestHeader(HEADER_USER_ID) Long requesterId,
+                                                          @RequestParam(required = false)
                                                          @DateTimeFormat(pattern = PATTERN) LocalDateTime start,
-                                                         @RequestParam(required = false)
+                                                          @RequestParam(required = false)
                                                          @DateTimeFormat(pattern = PATTERN) LocalDateTime end,
-                                                         @RequestParam(defaultValue = "0") Integer from,
-                                                         @RequestParam(defaultValue = "10") Integer size
+                                                          @RequestParam(defaultValue = "0") Integer from,
+                                                          @RequestParam(defaultValue = "10") Integer size
     ) {
         if (!userId.equals(requesterId)) {
             throw new ForbiddenException(String.format("Пользователь с id = %d не умеет доступа к данным пользователя "
                     + "с id = %d", userId, requesterId));
         }
         log.info("Подписки АПИ: получение данных о ивентах пользователей из подписок пользователя с id={}", userId);
-        return subscriptionService.getEventsFromSubscriptions(userId, start, end, from, size);
+
+        EventSearchParams params = new EventSearchParams();
+        params.setRangeStart(start);
+        params.setRangeEnd(end);
+        params.setFrom(from);
+        params.setSize(size);
+
+        return subscriptionService.getEventsFromSubscriptions(userId, params);
     }
 
 }

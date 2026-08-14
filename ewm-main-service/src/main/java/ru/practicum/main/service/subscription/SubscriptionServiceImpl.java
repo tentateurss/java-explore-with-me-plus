@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.main.dto.event.EventFullDto;
+import ru.practicum.main.dto.event.EventSearchParams;
+import ru.practicum.main.dto.event.EventShortDto;
 import ru.practicum.main.dto.subscription.SubscriberDto;
 import ru.practicum.main.dto.subscription.SubscriptionDto;
 import ru.practicum.main.dto.user.UserShortDto;
@@ -13,10 +14,9 @@ import ru.practicum.main.exception.NotFoundException;
 import ru.practicum.main.mapper.SubscriptionMapper;
 import ru.practicum.main.mapper.UserMapper;
 import ru.practicum.main.model.Subscription;
-import ru.practicum.main.model.User;
 import ru.practicum.main.repository.SubscriptionRepository;
 import ru.practicum.main.repository.UserRepository;
-import ru.practicum.main.service.event.EventService;
+import ru.practicum.main.service.event.PublicEventService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,10 +26,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SubscriptionServiceImpl implements SubscriptionService{
+@Transactional(readOnly = true)
+public class SubscriptionServiceImpl implements SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
-    private final EventService eventService;
+    private final PublicEventService eventService;
     private final UserRepository userRepository;
 
     @Override
@@ -100,12 +101,12 @@ public class SubscriptionServiceImpl implements SubscriptionService{
 
         return subscriptions.stream()
                 .map(subscription -> SubscriptionMapper.toSubscriberDto(subscription,
-                        subscribers.get(subscription.getSubscriberId()))) //Перепроверить название метода
+                        subscribers.get(subscription.getSubscriberId())))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<EventFullDto> getEventsFromSubscriptions(Long userId, LocalDateTime start, LocalDateTime end, int from, int size) {
+    public List<EventShortDto> getEventsFromSubscriptions(Long userId, EventSearchParams params) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь " + userId + " не найден.");
         }
@@ -118,19 +119,10 @@ public class SubscriptionServiceImpl implements SubscriptionService{
                 .map(sub -> sub.getAuthorId())
                 .collect(Collectors.toList());
 
-        //В этот метод мы приняли LocalDateTime, а передать надо String
-        String startStr = start != null ? start.toString() : null;
-        String endStr = end != null ? end.toString() : null;
-
-        return eventService.getEventsWithParameters(
-                authorIds,
-                List.of("PUBLISHED"),
-                null,
-                startStr,
-                endStr,
-                from,
-                size
-        );
+        return eventService.getAllEvents(params)
+                .stream()
+                .filter(event -> authorIds.contains(event.getInitiator().getId()))
+                .toList();
     }
 
     private Map<Long, UserShortDto> getUserDtos(List<Long> ids) {

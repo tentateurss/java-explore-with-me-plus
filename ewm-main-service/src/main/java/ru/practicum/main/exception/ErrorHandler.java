@@ -45,11 +45,11 @@ public class ErrorHandler {
         return new ApiError(HttpStatus.BAD_REQUEST, "Invalid request data", message);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ApiError handleForbidden(ForbiddenException e) {
-        log.warn("Forbidden error: {}", e.getMessage());
-        return new ApiError(HttpStatus.BAD_REQUEST, "Forbidden", e.getMessage());
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiError handleAuthFailure(ForbiddenException e) {
+        log.warn("Authorization failed: {}.", e.getMessage());
+        return new ApiError(HttpStatus.UNAUTHORIZED, "Authorization failure", e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
